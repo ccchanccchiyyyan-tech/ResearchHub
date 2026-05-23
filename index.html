@@ -144,19 +144,31 @@ select.dp-field option{background:var(--surf2);}
 .ta-btn{font-family:var(--mono);font-size:0.54rem;padding:2px 7px;border-radius:3px;border:1px solid var(--border2);background:var(--surf2);color:var(--muted2);cursor:pointer;white-space:nowrap;transition:all 0.11s;}
 .ta-btn:hover{border-color:var(--accent);color:var(--accent);}.ta-btn.fork:hover{border-color:var(--s4);color:var(--s4);}.ta-btn.del:hover{border-color:var(--stop);color:var(--stop);}
 
-/* NODE EDITOR */
-.node-editor{display:none;padding:12px 14px;border-top:1px solid var(--border);background:var(--surf);flex-shrink:0;}
-.node-editor.on{display:block;}
-.ne-title{font-family:var(--mono);font-size:0.62rem;color:var(--accent);font-weight:700;letter-spacing:0.06em;margin-bottom:10px;}
-.ne-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
-.ne-full{margin-bottom:8px;}
-.ne-label{font-family:var(--mono);font-size:0.55rem;color:var(--muted);letter-spacing:0.09em;text-transform:uppercase;margin-bottom:3px;}
-.ne-input{width:100%;background:var(--surf2);border:1px solid var(--border);border-radius:4px;padding:5px 8px;color:var(--text);font-family:var(--mono);font-size:0.68rem;outline:none;transition:border-color 0.12s;}
-.ne-input:focus{border-color:var(--accent);}
-.ne-actions{display:flex;gap:7px;justify-content:flex-end;}
-.ne-cancel{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:4px;padding:4px 12px;font-family:var(--mono);font-size:0.64rem;cursor:pointer;}
-.ne-ok{background:var(--accent2);border:none;color:#fff;border-radius:4px;padding:4px 14px;font-family:var(--mono);font-size:0.64rem;font-weight:700;cursor:pointer;}
-.ne-ok:hover{background:var(--accent);}
+
+/* NODE EDITOR DRAWER */
+.tree-area{display:flex;flex:1;overflow:hidden;position:relative;}
+.tree-scroll{overflow:auto;padding:15px 15px 30px;flex:1;transition:margin-right 0.22s cubic-bezier(.4,0,.2,1);}
+.node-drawer{width:0;flex-shrink:0;background:var(--surf2);border-left:1px solid var(--border);overflow:hidden;transition:width 0.22s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;}
+.node-drawer.open{width:220px;}
+.nd-header{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.nd-title{font-family:var(--mono);font-size:0.6rem;color:var(--accent);font-weight:700;letter-spacing:0.06em;}
+.nd-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.9rem;padding:1px 4px;border-radius:3px;}
+.nd-close:hover{color:var(--text);}
+.nd-body{flex:1;overflow-y:auto;padding:11px 11px 20px;}
+.nd-section{margin-bottom:10px;}
+.nd-label{font-family:var(--mono);font-size:0.54rem;color:var(--muted);letter-spacing:0.09em;text-transform:uppercase;margin-bottom:3px;}
+.nd-input{width:100%;background:var(--surf);border:1px solid var(--border);border-radius:4px;padding:5px 8px;color:var(--text);font-family:var(--mono);font-size:0.66rem;outline:none;transition:border-color 0.12s;resize:none;}
+.nd-input:focus{border-color:var(--accent);}
+.nd-footer{padding:10px 11px;border-top:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;gap:6px;}
+.nd-save{width:100%;padding:7px;background:var(--accent2);border:none;border-radius:4px;color:#fff;font-family:var(--mono);font-size:0.65rem;font-weight:700;cursor:pointer;transition:background 0.12s;letter-spacing:0.04em;}
+.nd-save:hover{background:var(--accent);}
+.nd-del{width:100%;padding:5px;background:transparent;border:1px solid rgba(248,81,73,0.3);border-radius:4px;color:var(--stop);font-family:var(--mono);font-size:0.62rem;cursor:pointer;transition:all 0.12s;}
+.nd-del:hover{background:var(--stop-bg);}
+.nd-fork{width:100%;padding:5px;background:transparent;border:1px solid rgba(86,211,100,0.3);border-radius:4px;color:var(--s4);font-family:var(--mono);font-size:0.62rem;cursor:pointer;transition:all 0.12s;}
+.nd-fork:hover{background:rgba(86,211,100,0.08);}
+.nd-add-child{width:100%;padding:5px;background:transparent;border:1px solid var(--border2);border-radius:4px;color:var(--muted2);font-family:var(--mono);font-size:0.62rem;cursor:pointer;transition:all 0.12s;}
+.nd-add-child:hover{border-color:var(--accent);color:var(--accent);}
+
 
 /* DIFF STRIP */
 .diff-strip{display:none;background:var(--surf2);border-top:1px solid var(--border);padding:10px 14px 14px;flex-shrink:0;}
@@ -184,6 +196,33 @@ table.diff-tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-
 .m-cancel{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:5px;padding:6px 15px;font-family:var(--mono);font-size:0.66rem;cursor:pointer;}
 .m-ok{background:var(--accent2);border:none;color:#fff;border-radius:5px;padding:6px 18px;font-family:var(--mono);font-size:0.66rem;font-weight:700;cursor:pointer;}
 .m-ok:hover{background:var(--accent);}
+
+/* CALENDAR PICKER */
+.cal-overlay{display:none;position:fixed;inset:0;z-index:300;background:transparent;}
+.cal-overlay.on{display:block;}
+.cal-popup{position:fixed;background:var(--surf);border:1px solid var(--border2);border-radius:10px;box-shadow:0 12px 40px rgba(0,0,0,0.5);padding:14px;width:240px;z-index:301;animation:mIn 0.14s ease;}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.cal-nav{background:none;border:none;color:var(--muted2);cursor:pointer;font-size:1rem;padding:2px 7px;border-radius:4px;transition:color 0.12s;}
+.cal-nav:hover{color:var(--accent);}
+.cal-month{font-family:var(--mono);font-size:0.72rem;font-weight:700;color:var(--text);letter-spacing:0.04em;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.cal-dow{font-family:var(--mono);font-size:0.55rem;color:var(--muted);text-align:center;padding:3px 0;letter-spacing:0.04em;}
+.cal-day{font-family:var(--mono);font-size:0.65rem;text-align:center;padding:5px 2px;border-radius:4px;cursor:pointer;color:var(--text);transition:background 0.1s,color 0.1s;border:1px solid transparent;}
+.cal-day:hover{background:var(--surf3);border-color:var(--border2);}
+.cal-day.today{border-color:var(--accent);color:var(--accent);}
+.cal-day.selected{background:var(--accent2);color:#fff;border-color:var(--accent2);}
+.cal-day.other-month{color:var(--muted);}
+.cal-day.empty{cursor:default;}
+.cal-day.empty:hover{background:transparent;border-color:transparent;}
+.cal-clear{width:100%;margin-top:8px;padding:5px;border:1px solid var(--border2);border-radius:5px;background:transparent;color:var(--muted2);font-family:var(--mono);font-size:0.6rem;cursor:pointer;transition:all 0.12s;letter-spacing:0.04em;}
+.cal-clear:hover{border-color:var(--stop);color:var(--stop);}
+.dp-date-btn{width:100%;background:var(--surf2);border:1px solid var(--border);border-radius:5px;padding:7px 10px;color:var(--text);font-family:var(--mono);font-size:0.7rem;cursor:pointer;text-align:left;transition:border-color 0.13s;display:flex;align-items:center;justify-content:space-between;}
+.dp-date-btn:hover{border-color:var(--accent);}
+.dp-date-btn.empty{color:var(--muted);}
+.m-date-btn{width:100%;background:var(--surf2);border:1px solid var(--border);border-radius:5px;padding:6px 9px;color:var(--text);font-family:var(--mono);font-size:0.7rem;cursor:pointer;text-align:left;transition:border-color 0.13s;display:flex;align-items:center;justify-content:space-between;}
+.m-date-btn:hover{border-color:var(--accent);}
+.m-date-btn.empty{color:var(--muted);}
+
 </style>
 </head>
 <body>
@@ -243,7 +282,7 @@ table.diff-tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-
           <div><div class="dp-label">Priority</div><select class="dp-field" id="dp-priority"><option value="high">High</option><option value="med">Med</option><option value="low">Low</option></select></div>
           <div><div class="dp-label">Category</div><select class="dp-field" id="dp-category"><option value="cat-analysis">Data Analysis</option><option value="cat-lit">Literature</option><option value="cat-writing">Writing</option><option value="cat-quentin">Quentin</option><option value="cat-code">Code / Dev</option><option value="cat-idea">Idea</option></select></div>
         </div>
-        <div class="dp-section"><div class="dp-label">Due Date</div><input class="dp-field" id="dp-due" type="date"></div>
+        <div class="dp-section"><div class="dp-label">Due Date</div><button class="dp-date-btn empty" id="dp-due-btn" onclick="openCal('dp')" type="button"><span id="dp-due-display">Select date...</span><span style="font-size:0.8rem;opacity:0.5">&#x1F4C5;</span></button></div>
         <div class="dp-section"><div class="dp-label">Notes</div><textarea class="dp-field notes-area" id="dp-notes" placeholder="Notes, links, ideas..."></textarea></div>
         <button class="dp-save" onclick="saveDetail()">Save Changes</button>
       </div>
@@ -263,21 +302,42 @@ table.diff-tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-
           </div>
           <span style="font-family:var(--mono);font-size:0.6rem;color:var(--muted2)" id="diffHint"></span>
         </div>
-        <div class="tree-scroll" id="treeScroll"></div>
-        <div class="node-editor" id="nodeEditor">
-          <div class="ne-title" id="neTitle">EDIT NODE</div>
-          <div class="ne-row">
-            <div><div class="ne-label">Stage</div><select class="ne-input" id="ne-stage"><option>S1</option><option>S2</option><option>S3</option><option>S4</option><option>S5</option><option>S6</option></select></div>
-            <div><div class="ne-label">Status</div><select class="ne-input" id="ne-status"><option>PENDING</option><option>RUNNING</option><option>DONE</option><option>STOP</option></select></div>
-          </div>
-          <div class="ne-full"><div class="ne-label">Name / Path</div><input class="ne-input" id="ne-name" placeholder="S3_2026-04-10_*_run1/ap4_bg6"></div>
-          <div class="ne-row">
-            <div><div class="ne-label">Param</div><input class="ne-input" id="ne-param" placeholder="EXOTiC-LD: 4para"></div>
-            <div><div class="ne-label">Note</div><input class="ne-input" id="ne-note" placeholder="备注..."></div>
-          </div>
-          <div class="ne-actions">
-            <button class="ne-cancel" onclick="closeNodeEditor()">Cancel</button>
-            <button class="ne-ok" onclick="saveNodeEditor()">Save</button>
+        <div class="tree-area">
+          <div class="tree-scroll" id="treeScroll"></div>
+          <!-- Node Drawer -->
+          <div class="node-drawer" id="nodeDrawer">
+            <div class="nd-header">
+              <span class="nd-title" id="ndTitle">NODE</span>
+              <button class="nd-close" onclick="closeNodeEditor()">&#x2715;</button>
+            </div>
+            <div class="nd-body">
+              <div class="nd-section">
+                <div class="nd-label">Stage</div>
+                <select class="nd-input" id="ne-stage"><option>S1</option><option>S2</option><option>S3</option><option>S4</option><option>S5</option><option>S6</option></select>
+              </div>
+              <div class="nd-section">
+                <div class="nd-label">Status</div>
+                <select class="nd-input" id="ne-status"><option>PENDING</option><option>RUNNING</option><option>DONE</option><option>STOP</option></select>
+              </div>
+              <div class="nd-section">
+                <div class="nd-label">Name / Path</div>
+                <input class="nd-input" id="ne-name" placeholder="S3_2026-04-10_*">
+              </div>
+              <div class="nd-section">
+                <div class="nd-label">Param</div>
+                <input class="nd-input" id="ne-param" placeholder="EXOTiC-LD: 4para">
+              </div>
+              <div class="nd-section">
+                <div class="nd-label">Note</div>
+                <textarea class="nd-input" id="ne-note" rows="2" placeholder="备注..."></textarea>
+              </div>
+            </div>
+            <div class="nd-footer">
+              <button class="nd-save" onclick="saveNodeEditor()">Save</button>
+              <button class="nd-add-child" id="ndAddChildBtn" onclick="ndAddChild()">+ Add Child</button>
+              <button class="nd-fork" id="ndForkBtn" onclick="ndFork()">&#x2442; Fork</button>
+              <button class="nd-del" id="ndDelBtn" onclick="ndDel()">Delete Node</button>
+            </div>
           </div>
         </div>
         <div class="diff-strip" id="diffStrip">
@@ -299,7 +359,7 @@ table.diff-tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-
       <div class="m-g"><div class="m-label">Priority</div><select class="m-input" id="m-priority"><option value="high">High</option><option value="med" selected>Med</option><option value="low">Low</option></select></div>
       <div class="m-g"><div class="m-label">Category</div><select class="m-input" id="m-category"><option value="cat-analysis">Data Analysis</option><option value="cat-lit">Literature</option><option value="cat-writing">Writing</option><option value="cat-quentin">Quentin</option><option value="cat-code">Code/Dev</option><option value="cat-idea">Idea</option></select></div>
     </div>
-    <div class="m-g"><div class="m-label">Due Date</div><input class="m-input" id="m-due" type="date"></div>
+    <div class="m-g"><div class="m-label">Due Date</div><button class="m-date-btn empty" id="m-due-btn" onclick="openCal('m')" type="button"><span id="m-due-display">Select date...</span><span style="font-size:0.8rem;opacity:0.5">&#x1F4C5;</span></button></div>
     <div class="m-actions"><button class="m-cancel" onclick="closeTaskModal()">Cancel</button><button class="m-ok" onclick="saveNewTask()">Create</button></div>
   </div>
 </div>
@@ -392,7 +452,7 @@ function openTask(id){
   document.getElementById('dp-status').value=t.status;
   document.getElementById('dp-priority').value=t.priority;
   document.getElementById('dp-category').value=t.category;
-  document.getElementById('dp-due').value=t.due||'';
+  setDateValue('dp', t.due||'');
   document.getElementById('dp-notes').value=t.notes||'';
   renderTaskFiles(id);renderTree();switchTab(activeTab);renderKanban();
 }
@@ -405,7 +465,7 @@ function saveDetail(){
   t.status=document.getElementById('dp-status').value;
   t.priority=document.getElementById('dp-priority').value;
   t.category=document.getElementById('dp-category').value;
-  t.due=document.getElementById('dp-due').value;
+  t.due=getDateValue('dp');
   t.notes=document.getElementById('dp-notes').value.trim();
   document.getElementById('dpBc').textContent=t.title.length>38?t.title.slice(0,38)+'...':t.title;
   renderKanban();
@@ -487,8 +547,6 @@ function renderTNode(n,isRoot){
       <div class="t-actions">
         <button class="ta-btn fork" onclick="treeAddFork('${n.id}',event)">&#x2442; Fork</button>
         <button class="ta-btn" onclick="treeAddChild('${n.id}',event)">+ Child</button>
-        <button class="ta-btn" onclick="treeEditNode('${n.id}',event)">Edit</button>
-        <button class="ta-btn del" onclick="treeDelNode('${n.id}',event)">&#x2715;</button>
       </div>
     </div>
     ${hasCh&&!n.collapsed?`<div class="t-children">${n.children.map(c=>renderTNode(c,false)).join('')}</div>`:''}
@@ -498,14 +556,89 @@ function renderTNode(n,isRoot){
 function toggleCollapse(id,e){e.stopPropagation();const t=getTask(activeTaskId);const n=findNode(id,t.tree);if(n){n.collapsed=!n.collapsed;renderTree();}}
 function treeNodeClick(id){if(diffMode){pickDiff(id);return;}treeEditNode(id);}
 
-function treeAddRoot(){neMode='add-root';neParentId=null;neNodeId=null;document.getElementById('neTitle').textContent='+ NEW ROOT BRANCH';resetNe();openNE();}
-function treeAddChild(pid,e){if(e)e.stopPropagation();const t=getTask(activeTaskId);const p=findNode(pid,t.tree);neMode='add-child';neParentId=pid;neNodeId=null;document.getElementById('neTitle').textContent='+ CHILD NODE';document.getElementById('ne-stage').value=nextStage[p.stage]||p.stage;document.getElementById('ne-status').value='PENDING';document.getElementById('ne-name').value='';document.getElementById('ne-param').value='';document.getElementById('ne-note').value='';openNE();}
-function treeAddFork(pid,e){if(e)e.stopPropagation();const t=getTask(activeTaskId);const p=findNode(pid,t.tree);neMode='add-fork';neParentId=pid;neNodeId=null;document.getElementById('neTitle').textContent='&#x2442; FORK FROM ...'+p.name.slice(-14);document.getElementById('ne-stage').value=p.stage;document.getElementById('ne-status').value='PENDING';document.getElementById('ne-name').value=p.name;document.getElementById('ne-param').value=p.param||'';document.getElementById('ne-note').value='';openNE();}
-function treeEditNode(id,e){if(e)e.stopPropagation();const t=getTask(activeTaskId);const n=findNode(id,t.tree);neMode='edit';neNodeId=id;document.getElementById('neTitle').textContent='EDIT NODE';document.getElementById('ne-stage').value=n.stage;document.getElementById('ne-status').value=n.status;document.getElementById('ne-name').value=n.name;document.getElementById('ne-param').value=n.param||'';document.getElementById('ne-note').value=n.note||'';openNE();}
-function treeDelNode(id,e){if(e)e.stopPropagation();if(!confirm('Delete node and all children?'))return;const t=getTask(activeTaskId);deleteNodeFn(id,t.tree);if(diffA===id)diffA=null;if(diffB===id)diffB=null;closeNodeEditor();renderTree();renderKanban();}
+function setDrawerMode(isNew) {
+  ['ndAddChildBtn','ndForkBtn','ndDelBtn'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = isNew ? 'none' : '';
+  });
+}
+function treeAddRoot() {
+  neMode='add-root'; neParentId=null; neNodeId=null;
+  resetNe();
+  const el = document.getElementById('ndTitle');
+  if (el) el.textContent = '+ NEW ROOT';
+  setDrawerMode(true);
+  openNE();
+}
+function treeAddChild(pid, e) {
+  if (e) e.stopPropagation();
+  const t = getTask(activeTaskId);
+  const p = findNode(pid, t.tree);
+  neMode='add-child'; neParentId=pid; neNodeId=null;
+  const el = document.getElementById('ndTitle');
+  if (el) el.textContent = '+ CHILD';
+  document.getElementById('ne-stage').value  = nextStage[p.stage] || p.stage;
+  document.getElementById('ne-status').value = 'PENDING';
+  document.getElementById('ne-name').value   = '';
+  document.getElementById('ne-param').value  = '';
+  document.getElementById('ne-note').value   = '';
+  setDrawerMode(true);
+  openNE();
+}
+function treeAddFork(pid, e) {
+  if (e) e.stopPropagation();
+  const t = getTask(activeTaskId);
+  const p = findNode(pid, t.tree);
+  neMode='add-fork'; neParentId=pid; neNodeId=null;
+  const el = document.getElementById('ndTitle');
+  if (el) el.textContent = '⑂ FORK';
+  document.getElementById('ne-stage').value  = p.stage;
+  document.getElementById('ne-status').value = 'PENDING';
+  document.getElementById('ne-name').value   = p.name;
+  document.getElementById('ne-param').value  = p.param || '';
+  document.getElementById('ne-note').value   = '';
+  setDrawerMode(true);
+  openNE();
+}
+function treeEditNode(id, e) {
+  if (e) e.stopPropagation();
+  const t = getTask(activeTaskId);
+  const n = findNode(id, t.tree);
+  neMode='edit'; neNodeId=id;
+  const el = document.getElementById('ndTitle');
+  if (el) el.textContent = n.stage + ': ' + n.name.split('/').pop().slice(-16);
+  document.getElementById('ne-stage').value  = n.stage;
+  document.getElementById('ne-status').value = n.status;
+  document.getElementById('ne-name').value   = n.name;
+  document.getElementById('ne-param').value  = n.param || '';
+  document.getElementById('ne-note').value   = n.note  || '';
+  setDrawerMode(false);
+  openNE();
+}
+function treeDelNode(id, e) { if (e) e.stopPropagation(); ndDel(); }
+function ndDel() {
+  if (!neNodeId) return;
+  if (!confirm('Delete node and all children?')) return;
+  const t = getTask(activeTaskId);
+  deleteNodeFn(neNodeId, t.tree);
+  if (diffA === neNodeId) diffA = null;
+  if (diffB === neNodeId) diffB = null;
+  closeNodeEditor();
+  renderTree();
+  renderKanban();
+}
+function ndAddChild() { if (!neNodeId) return; const pid = neNodeId; closeNodeEditor(); treeAddChild(pid); }
+function ndFork()     { if (!neNodeId) return; const pid = neNodeId; closeNodeEditor(); treeAddFork(pid); }
+function openNE() {
+  const d = document.getElementById('nodeDrawer');
+  if (d) d.classList.add('open');
+}
+function closeNodeEditor() {
+  const d = document.getElementById('nodeDrawer');
+  if (d) d.classList.remove('open');
+  neMode=null; neParentId=null; neNodeId=null;
+}
 
-function openNE(){document.getElementById('nodeEditor').classList.add('on');}
-function closeNodeEditor(){document.getElementById('nodeEditor').classList.remove('on');neMode=null;neParentId=null;neNodeId=null;}
 function resetNe(){document.getElementById('ne-stage').value='S1';document.getElementById('ne-status').value='PENDING';document.getElementById('ne-name').value='';document.getElementById('ne-param').value='';document.getElementById('ne-note').value='';}
 
 function saveNodeEditor(){
@@ -529,13 +662,125 @@ function pickDiff(id){if(!diffA||(diffA&&diffB)){diffA=id;diffB=null;document.ge
 function showDiff(){const t=getTask(activeTaskId);const a=findNode(diffA,t.tree),b=findNode(diffB,t.tree);if(!a||!b)return;const fa={stage:a.stage,status:a.status,param:a.param||'—',note:a.note||'—'};const fb={stage:b.stage,status:b.status,param:b.param||'—',note:b.note||'—'};const rows=Object.keys(fa).map(k=>`<tr class="${fa[k]===fb[k]?'':'diff-row-changed'}"><td class="diff-key">${k}</td><td>${fa[k]}</td><td>${fb[k]}</td></tr>`).join('');document.getElementById('diffContent').innerHTML=`<table class="diff-tbl"><tr><th>Field</th><th style="color:var(--accent)">A: ${a.name.split('/').pop()}</th><th style="color:var(--run)">B: ${b.name.split('/').pop()}</th></tr>${rows}</table>`;document.getElementById('diffStrip').classList.add('on');}
 function clearDiff(){diffA=null;diffB=null;document.getElementById('diffStrip').classList.remove('on');document.getElementById('diffHint').textContent='';renderTree();}
 
-function openNewTaskModal(defaultStatus){document.getElementById('m-status').value=defaultStatus||'todo';document.getElementById('m-priority').value='med';document.getElementById('m-category').value='cat-analysis';document.getElementById('m-title').value='';document.getElementById('m-due').value='';document.getElementById('taskModal').classList.add('on');setTimeout(()=>document.getElementById('m-title').focus(),50);}
+function openNewTaskModal(defaultStatus){document.getElementById('m-status').value=defaultStatus||'todo';document.getElementById('m-priority').value='med';document.getElementById('m-category').value='cat-analysis';document.getElementById('m-title').value='';setDateValue('m',''); const td=today(); setDateValue('m',`${td.y}-${String(td.m+1).padStart(2,'0')}-${String(td.d).padStart(2,'0')}`);document.getElementById('taskModal').classList.add('on');setTimeout(()=>document.getElementById('m-title').focus(),50);}
 function closeTaskModal(){document.getElementById('taskModal').classList.remove('on');}
 function closeModalOut(e){if(e.target===document.getElementById('taskModal'))closeTaskModal();}
 function saveNewTask(){
   const title=document.getElementById('m-title').value.trim();if(!title){alert('Title required');return;}
-  const t={id:'t'+(nextTaskId++),title,status:document.getElementById('m-status').value,priority:document.getElementById('m-priority').value,category:document.getElementById('m-category').value,due:document.getElementById('m-due').value,notes:'',files:[],tree:[]};
+  const t={id:'t'+(nextTaskId++),title,status:document.getElementById('m-status').value,priority:document.getElementById('m-priority').value,category:document.getElementById('m-category').value,due:getDateValue('m'),notes:'',files:[],tree:[]};
   tasks.push(t);closeTaskModal();renderKanban();openTask(t.id);
+}
+
+
+// ══════════════════════════════════════════════════════
+// CALENDAR PICKER
+// ══════════════════════════════════════════════════════
+let calTarget = null;   // 'dp' or 'm'
+let calYear, calMonth;
+let calSelectedDate = { dp: null, m: null };
+
+const DOW = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function today() {
+  const d = new Date();
+  return { y: d.getFullYear(), m: d.getMonth(), d: d.getDate() };
+}
+
+function openCal(target) {
+  calTarget = target;
+  const t = today();
+  const sel = calSelectedDate[target];
+  calYear  = sel ? sel.y : t.y;
+  calMonth = sel ? sel.m : t.m;
+  renderCalGrid();
+  // position near the button
+  const btn = document.getElementById(target + '-due-btn');
+  const rect = btn.getBoundingClientRect();
+  const popup = document.getElementById('calPopup');
+  popup.style.display = 'block';
+  // position below the button, clamped to viewport
+  let top = rect.bottom + 6;
+  let left = rect.left;
+  if (left + 240 > window.innerWidth - 8) left = window.innerWidth - 248;
+  if (top + 320 > window.innerHeight - 8) top = rect.top - 320;
+  popup.style.top  = top  + 'px';
+  popup.style.left = left + 'px';
+  document.getElementById('calOverlay').classList.add('on');
+}
+
+function closeCal() {
+  document.getElementById('calPopup').style.display = 'none';
+  document.getElementById('calOverlay').classList.remove('on');
+  calTarget = null;
+}
+
+function calNav(dir) {
+  calMonth += dir;
+  if (calMonth < 0)  { calMonth = 11; calYear--; }
+  if (calMonth > 11) { calMonth = 0;  calYear++; }
+  renderCalGrid();
+}
+
+function renderCalGrid() {
+  document.getElementById('calMonth').textContent = MONTHS[calMonth] + ' ' + calYear;
+  const t = today();
+  const sel = calSelectedDate[calTarget];
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const grid = document.getElementById('calGrid');
+
+  let html = DOW.map(d => `<div class="cal-dow">${d}</div>`).join('');
+  // empty cells before first day
+  for (let i = 0; i < firstDay; i++) html += '<div class="cal-day empty"></div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday = d === t.d && calMonth === t.m && calYear === t.y;
+    const isSel   = sel && d === sel.d && calMonth === sel.m && calYear === sel.y;
+    const cls = [isToday?'today':'', isSel?'selected':''].filter(Boolean).join(' ');
+    html += `<div class="cal-day ${cls}" onclick="calSelect(${d})">${d}</div>`;
+  }
+  grid.innerHTML = html;
+}
+
+function calSelect(d) {
+  calSelectedDate[calTarget] = { y: calYear, m: calMonth, d };
+  const iso = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  updateDateBtn(calTarget, iso);
+  closeCal();
+}
+
+function calClear() {
+  calSelectedDate[calTarget] = null;
+  updateDateBtn(calTarget, '');
+  closeCal();
+}
+
+function updateDateBtn(target, iso) {
+  const btn     = document.getElementById(target + '-due-btn');
+  const display = document.getElementById(target + '-due-display');
+  if (iso) {
+    const d = new Date(iso + 'T00:00:00');
+    display.textContent = d.toLocaleDateString('zh-CN', { year:'numeric', month:'short', day:'numeric' });
+    btn.classList.remove('empty');
+  } else {
+    display.textContent = 'Select date...';
+    btn.classList.add('empty');
+  }
+  btn.dataset.value = iso;
+}
+
+function getDateValue(target) {
+  return document.getElementById(target + '-due-btn').dataset.value || '';
+}
+
+function setDateValue(target, iso) {
+  if (iso) {
+    const d = new Date(iso + 'T00:00:00');
+    calSelectedDate[target] = { y: d.getFullYear(), m: d.getMonth(), d: d.getDate() };
+  } else {
+    calSelectedDate[target] = null;
+  }
+  updateDateBtn(target, iso || '');
 }
 
 // ══════════════════════════════════════════════════════
@@ -658,6 +903,19 @@ loadLocal();
 renderKanban();
 
 </script>
+
+
+<!-- Calendar Popup -->
+<div class="cal-overlay" id="calOverlay" onclick="closeCal()"></div>
+<div class="cal-popup" id="calPopup" style="display:none">
+  <div class="cal-header">
+    <button class="cal-nav" onclick="calNav(-1)">&#x2039;</button>
+    <span class="cal-month" id="calMonth"></span>
+    <button class="cal-nav" onclick="calNav(1)">&#x203A;</button>
+  </div>
+  <div class="cal-grid" id="calGrid"></div>
+  <button class="cal-clear" onclick="calClear()">Clear date</button>
+</div>
 
 <!-- Settings Modal -->
 <div class="overlay" id="settingsModal" onclick="closeSettingsOut(event)">
