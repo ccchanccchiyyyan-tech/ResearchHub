@@ -580,7 +580,7 @@ const nextStage={S1:'S2',S2:'S3',S3:'S4',S4:'S5',S5:'S6',S6:'S6'};
 
 let tasks=[
   {id:'t1',title:'整理可用的 pipeline 配置并发送给 Quentin',status:'todo',priority:'high',category:'cat-quentin',due:'2026-05-27',notes:'整理完毕后通过 Slack 发送',files:[],tree:[],checklist:[],parentTaskId:null,createdAt:'2026-05-23',completedAt:null,timerSessions:[]},
-  {id:'t2',title:'整理不同假设下的光谱结果对比',status:'todo',priority:'high',category:'cat-analysis',due:'2026-05-27',notes:'对比各假设之间的差异，准备图表',files:[],checklist:[{id:'ci1',text:'跑 EXOTiC-LD: 4para 方案',done:false,promotedTaskId:null},{id:'ci2',text:'跑 EXOTiC-LD: quadratic 方案',done:false,promotedTaskId:null},{id:'ci3',text:'生成结果对比图',done:false,promotedTaskId:null}],parentTaskId:null,
+  {id:'t2',title:'整理不同假设下的光谱结果对比',status:'todo',priority:'high',category:'cat-analysis',due:'2026-05-27',notes:'对比各假设之间的差异，准备图表',files:[],checklist:[],parentTaskId:null,
     tree:[
       {id:'tn1',stage:'S1',name:'S1_2026-04-09_*_run1',status:'DONE',param:'ramp_fit_firstgroup = 1',note:'',files:[],collapsed:false,children:[
         {id:'tn2',stage:'S2',name:'S2_2026-04-10_*_run1',status:'DONE',param:'',note:'',files:[],collapsed:false,children:[
@@ -644,7 +644,7 @@ function cardHTML(t){
   const isAct=t.id===activeTaskId;
   const cl=t.checklist||[];
   const clTotal=cl.length;
-  const clDone=cl.filter(i=>i.done&&!i.promotedTaskId).length + cl.filter(i=>i.promotedTaskId).length;
+  const clDone=cl.filter(i=>i.done&&!i.promotedTaskId).length + cl.filter(i=>i.promotedTaskId&&getTask(i.promotedTaskId)&&getTask(i.promotedTaskId).status==='done').length;
   const clPct=clTotal>0?Math.round(clDone/clTotal*100):0;
   const clHtml=clTotal>0?`<div class="card-cl-bar"><div class="card-cl-prog"><div class="card-cl-fill" style="width:${clPct}%"></div></div><span>${clDone}/${clTotal}</span></div>`:'';
   const footerContent=[clHtml,hasTree?'<span class="badge-tree">&#x2442; tree</span>':''].filter(Boolean).join('');
@@ -706,9 +706,17 @@ function saveDetail(){
 
 function deleteActive(){
   if(!activeTaskId)return;
-  if(!confirm('Delete this task?'))return;
-  tasks=tasks.filter(x=>x.id!==activeTaskId);
-  closeDetail();renderKanban();
+  const delId = activeTaskId;
+  const delTask = getTask(delId);
+  // if this task was promoted from a parent's checklist, remove that checklist item too
+  if (delTask && delTask.parentTaskId) {
+    const parent = getTask(delTask.parentTaskId);
+    if (parent && parent.checklist) {
+      parent.checklist = parent.checklist.filter(i => i.promotedTaskId !== delId);
+    }
+  }
+  tasks = tasks.filter(x => x.id !== delId);
+  closeDetail(); renderKanban();
 }
 
 function switchTab(name){
@@ -854,7 +862,6 @@ function treeEditNode(id, e) {
 function treeDelNode(id, e) { if (e) e.stopPropagation(); ndDel(); }
 function ndDel() {
   if (!neNodeId) return;
-  if (!confirm('Delete node and all children?')) return;
   const t = getTask(activeTaskId);
   deleteNodeFn(neNodeId, t.tree);
   if (diffA === neNodeId) diffA = null;
@@ -1037,7 +1044,7 @@ function setDateValue(target, iso) {
 // ══════════════════════════════════════════════════════
 // CHECKLIST
 // ══════════════════════════════════════════════════════
-let clNextId = 50;
+let clNextId = 1;
 
 function renderChecklist() {
   const t = getTask(activeTaskId);
@@ -1046,7 +1053,7 @@ function renderChecklist() {
 
   const cl = t.checklist;
   const real = cl.filter(i => !i.promotedTaskId);
-  const done = cl.filter(i => i.done && !i.promotedTaskId).length + cl.filter(i=>i.promotedTaskId).length;
+  const done = cl.filter(i => i.done && !i.promotedTaskId).length + cl.filter(i=>i.promotedTaskId&&getTask(i.promotedTaskId)&&getTask(i.promotedTaskId).status==='done').length;
   const total = cl.length;
   const pct = total > 0 ? Math.round(done/total*100) : 0;
 
@@ -1068,16 +1075,17 @@ function renderChecklist() {
     if (item.promotedTaskId) {
       const pt = getTask(item.promotedTaskId);
       const ptTitle = pt ? (pt.title.length>30?pt.title.slice(0,30)+'...':pt.title) : '(deleted)';
-      const ptStatus = pt ? pt.status : null;
+      const ptStatus = pt ? pt.status : 'todo';
       const isDone = ptStatus === 'done';
-      return `<div class="cl-item promoted" style="opacity:0.75">
-        <input type="checkbox" class="cl-check" ${isDone?'checked':''} disabled title="${ptStatus||'promoted'}">
-        <a class="cl-promoted-link" onclick="openTask('${item.promotedTaskId}')" style="font-style:italic">
+      return `<div class="cl-item promoted">
+        <input type="checkbox" class="cl-check" ${isDone?'checked':''} disabled>
+        <a class="cl-promoted-link" onclick="event.stopPropagation();openTask('${item.promotedTaskId}')">
           <span class="cl-promoted-icon">&#x2197;</span>${ptTitle}
-          <span style="font-size:0.55rem;color:var(--muted2);margin-left:4px">[${ptStatus||'todo'}]</span>
+          <span class="cl-status-tag">[${ptStatus}]</span>
         </a>
-        <div class="cl-item-actions" style="opacity:0;transition:opacity 0.12s">
-          <button class="cl-action-btn del" onclick="clDeletePromoted('${item.id}')" title="Remove link">&#x2715;</button>
+        <div class="cl-item-actions">
+          <button class="cl-action-btn" onclick="clUndoPromote('${item.id}')" title="Undo promote — delete linked task and restore checkbox">&#x21A9; Undo</button>
+          <button class="cl-action-btn del" onclick="clDeletePromoted('${item.id}')" title="Remove link only">&#x2715;</button>
         </div>
       </div>`;
     }
@@ -1144,12 +1152,26 @@ function clDeletePromoted(itemId) {
   const t = getTask(activeTaskId);
   const item = t.checklist.find(i => i.id === itemId);
   if (!item) return;
-  // unlink the promoted task's parentTaskId
+  // just unlink - child task stays in kanban as a normal independent task
   if (item.promotedTaskId) {
     const child = getTask(item.promotedTaskId);
     if (child) child.parentTaskId = null;
   }
-  // restore item to normal checkbox (un-promote)
+  // remove the promoted item from checklist entirely
+  t.checklist = t.checklist.filter(i => i.id !== itemId);
+  renderChecklist(); renderKanban();
+}
+
+function clUndoPromote(itemId) {
+  const t = getTask(activeTaskId);
+  const item = t.checklist.find(i => i.id === itemId);
+  if (!item) return;
+  // delete the promoted task entirely
+  if (item.promotedTaskId) {
+    tasks = tasks.filter(x => x.id !== item.promotedTaskId);
+    if (activeTaskId === item.promotedTaskId) closeDetail();
+  }
+  // restore item to normal checkbox with original text
   item.promotedTaskId = null;
   item.done = false;
   renderChecklist(); renderKanban();
@@ -1734,12 +1756,16 @@ function deserializeData(json) {
 const _origRender = renderKanban;
 renderKanban = function() {
   _origRender();
-  localStorage.setItem('rh_data', serializeData());
+  const data = serializeData();
+  try { localStorage.setItem('rh_data', data); } catch(e) {}
 };
 
 // Load from localStorage on startup
-function loadLocal() {
-  const saved = localStorage.getItem('rh_data');
+async function loadLocal() {
+  // Skip window.storage (Claude preview) - use Gist as the real sync mechanism
+  // Only load from localStorage (for deployed GitHub Pages use)
+  let saved = null;
+  try { saved = localStorage.getItem('rh_data'); } catch(e) {}
   if (saved) {
     try { deserializeData(saved); } catch(e) {}
   }
@@ -1796,6 +1822,8 @@ function openSettings() {
   document.getElementById('settingsModal').classList.add('on');
 }
 function closeSettings() { document.getElementById('settingsModal').classList.remove('on'); }
+
+
 function closeSettingsOut(e) { if(e.target===document.getElementById('settingsModal')) closeSettings(); }
 function saveSettings() {
   localStorage.setItem('rh_pat',  document.getElementById('s-pat').value.trim());
@@ -1806,8 +1834,19 @@ function saveSettings() {
 }
 
 // ══ INIT ══
-loadLocal();
-renderKanban();
+(async () => {
+  // Detect Claude preview environment (has window.storage but no real hostname)
+  const isClaudePreview = typeof window.storage !== 'undefined';
+  if (isClaudePreview) {
+    // Always start fresh in Claude preview - never load stale test data
+    try { await window.storage.delete('rh_data'); } catch(e) {}
+    renderKanban();
+  } else {
+    // Real deployment: load from localStorage
+    await loadLocal();
+    renderKanban();
+  }
+})();
 
 </script>
 
@@ -1853,6 +1892,7 @@ renderKanban();
       3. Click &#x2191; Save to push data to Gist<br>
       4. On other devices: fill PAT, then Pull from Gist
     </div>
+
   </div>
 </div>
 
