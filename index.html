@@ -232,6 +232,44 @@ table.diff-tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-
 .kol-drop-indicator{height:3px;background:var(--accent);border-radius:2px;margin:2px 0;opacity:0;transition:opacity 0.12s;}
 .kol-drop-indicator.active{opacity:1;}
 
+
+/* CHECKLIST */
+.cl-tab-body{padding:14px 16px 32px;}
+.cl-progress-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.cl-prog-bar{flex:1;height:4px;background:var(--border2);border-radius:2px;overflow:hidden;}
+.cl-prog-fill{height:100%;background:var(--c-done);border-radius:2px;transition:width 0.3s;}
+.cl-prog-label{font-family:var(--mono);font-size:0.6rem;color:var(--muted2);white-space:nowrap;}
+.cl-list{display:flex;flex-direction:column;gap:2px;margin-bottom:12px;}
+.cl-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:5px;position:relative;border:1px solid transparent;transition:background 0.12s,border-color 0.12s;}
+.cl-item:hover{background:var(--surf2);border-color:var(--border);}
+.cl-item.promoted{opacity:0.55;}
+.cl-check{width:15px;height:15px;flex-shrink:0;accent-color:var(--c-done);cursor:pointer;}
+.cl-text{flex:1;font-family:var(--mono);font-size:0.7rem;color:var(--text);background:transparent;border:none;outline:none;padding:0;cursor:text;min-width:0;}
+.cl-text:focus{color:var(--text);}
+.cl-text.done-text{text-decoration:line-through;color:var(--muted);}
+.cl-promoted-link{flex:1;font-family:var(--mono);font-size:0.7rem;color:var(--accent);text-decoration:none;display:flex;align-items:center;gap:5px;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.cl-promoted-link:hover{text-decoration:underline;}
+.cl-promoted-icon{font-size:0.65rem;flex-shrink:0;}
+.cl-item-actions{display:flex;gap:3px;opacity:0;transition:opacity 0.12s;flex-shrink:0;}
+.cl-item:hover .cl-item-actions{opacity:1;}
+.cl-item.promoted .cl-item-actions{display:none;}
+.cl-action-btn{font-family:var(--mono);font-size:0.56rem;padding:2px 6px;border-radius:3px;border:1px solid var(--border2);background:var(--surf);color:var(--muted2);cursor:pointer;white-space:nowrap;transition:all 0.11s;}
+.cl-action-btn:hover{border-color:var(--accent);color:var(--accent);}
+.cl-action-btn.promote:hover{border-color:var(--cat-analysis);color:var(--cat-analysis);}
+.cl-action-btn.del:hover{border-color:var(--stop);color:var(--stop);}
+.cl-add-row{display:flex;gap:8px;align-items:center;}
+.cl-add-input{flex:1;background:var(--surf2);border:1px solid var(--border);border-radius:5px;padding:7px 10px;color:var(--text);font-family:var(--mono);font-size:0.7rem;outline:none;transition:border-color 0.13s;}
+.cl-add-input:focus{border-color:var(--accent);}
+.cl-add-btn{font-family:var(--mono);font-size:0.68rem;padding:7px 12px;border-radius:5px;border:1px solid var(--border2);background:transparent;color:var(--muted2);cursor:pointer;transition:all 0.12s;white-space:nowrap;}
+.cl-add-btn:hover{border-color:var(--accent);color:var(--accent);}
+.parent-link{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:0.62rem;color:var(--muted2);background:var(--surf2);border:1px solid var(--border);border-radius:5px;padding:6px 10px;margin-bottom:14px;cursor:pointer;transition:border-color 0.12s;}
+.parent-link:hover{border-color:var(--accent);color:var(--accent);}
+.parent-link-icon{color:var(--accent);}
+/* card checklist progress */
+.card-cl-bar{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:0.56rem;color:var(--muted2);}
+.card-cl-prog{width:36px;height:3px;background:var(--border2);border-radius:2px;overflow:hidden;}
+.card-cl-fill{height:100%;background:var(--c-done);border-radius:2px;transition:width 0.3s;}
+
 </style>
 </head>
 <body>
@@ -252,7 +290,7 @@ table.diff-tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-
 </header>
 
 <div class="app-body">
-  <div class="kanban-area" id="kanbanArea">
+  <div class="kanban-area" id="kanbanArea" onclick="handleKanbanClick(event)">
     <div class="kol">
       <div class="kol-head todo"><div class="kol-title"><span class="kol-dot"></span>To Do</div><span class="kol-count" id="cnt-todo">0</span></div>
       <div class="kol-body" id="col-todo" ondragover="dragOver(event,'todo')" ondragleave="dragLeave(event)" ondrop="drop(event,'todo')"></div>
@@ -280,12 +318,14 @@ table.diff-tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-
     </div>
     <div class="dp-tabs">
       <button class="dp-tab active" onclick="switchTab('info')">Info</button>
+      <button class="dp-tab" onclick="switchTab('checklist')">Checklist</button>
       <button class="dp-tab" onclick="switchTab('files')">Files</button>
       <button class="dp-tab" onclick="switchTab('pipeline')">Pipeline Tree</button>
     </div>
     <div class="dp-body">
 
       <div class="tab-pane active" id="tab-info">
+        <div id="dp-parent-link"></div>
         <div class="dp-section"><div class="dp-label">Title</div><input class="dp-field" id="dp-title" placeholder="Task title"></div>
         <div class="dp-section dp-row3">
           <div><div class="dp-label">Status</div><select class="dp-field" id="dp-status"><option value="todo">To Do</option><option value="doing">In Progress</option><option value="done">Done</option></select></div>
@@ -297,6 +337,20 @@ table.diff-tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-
         <button class="dp-save" onclick="saveDetail()">Save Changes</button>
       </div>
 
+      <div class="tab-pane" id="tab-checklist">
+        <div class="cl-tab-body">
+          <div id="cl-parent-link"></div>
+          <div class="cl-progress-row" id="cl-progress-row" style="display:none">
+            <div class="cl-prog-bar"><div class="cl-prog-fill" id="cl-prog-fill"></div></div>
+            <span class="cl-prog-label" id="cl-prog-label">0/0</span>
+          </div>
+          <div class="cl-list" id="cl-list"></div>
+          <div class="cl-add-row">
+            <input class="cl-add-input" id="cl-add-input" placeholder="Add item..." onkeydown="clAddOnEnter(event)">
+            <button class="cl-add-btn" onclick="clAddItem()">+ Add</button>
+          </div>
+        </div>
+      </div>
       <div class="tab-pane" id="tab-files">
         <div class="dp-section"><div class="dp-label">Attachments</div>
           <div class="file-drop-zone" id="task-dropzone"><input type="file" id="task-file-input" multiple><div class="fdz-label">Drop files here or click to upload<br><span style="font-size:0.55rem;color:var(--muted)">log · png · fits · txt · any format</span></div></div>
@@ -362,7 +416,7 @@ table.diff-tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-
 
 <div class="overlay" id="taskModal" onclick="closeModalOut(event)">
   <div class="modal">
-    <h3>NEW TASK</h3>
+    <h3 id="modalH">NEW TASK</h3>
     <div class="m-g"><div class="m-label">Title</div><input class="m-input" id="m-title" placeholder="What do you want to do?"></div>
     <div class="m-row3">
       <div class="m-g"><div class="m-label">Status</div><select class="m-input" id="m-status"><option value="todo">To Do</option><option value="doing">In Progress</option><option value="done">Done</option></select></div>
@@ -379,8 +433,8 @@ const catLabel={'cat-analysis':'Data Analysis','cat-lit':'Literature','cat-writi
 const nextStage={S1:'S2',S2:'S3',S3:'S4',S4:'S5',S5:'S6',S6:'S6'};
 
 let tasks=[
-  {id:'t1',title:'整理可用的 pipeline 配置并发送给 Quentin',status:'todo',priority:'high',category:'cat-quentin',due:'2026-05-27',notes:'整理完毕后通过 Slack 发送',files:[],tree:[]},
-  {id:'t2',title:'整理不同假设下的光谱结果对比',status:'todo',priority:'high',category:'cat-analysis',due:'2026-05-27',notes:'对比各假设之间的差异，准备图表',files:[],
+  {id:'t1',title:'整理可用的 pipeline 配置并发送给 Quentin',status:'todo',priority:'high',category:'cat-quentin',due:'2026-05-27',notes:'整理完毕后通过 Slack 发送',files:[],tree:[],checklist:[],parentTaskId:null},
+  {id:'t2',title:'整理不同假设下的光谱结果对比',status:'todo',priority:'high',category:'cat-analysis',due:'2026-05-27',notes:'对比各假设之间的差异，准备图表',files:[],checklist:[{id:'ci1',text:'跑 EXOTiC-LD: 4para 方案',done:false,promotedTaskId:null},{id:'ci2',text:'跑 EXOTiC-LD: quadratic 方案',done:false,promotedTaskId:null},{id:'ci3',text:'生成结果对比图',done:false,promotedTaskId:null}],parentTaskId:null,
     tree:[
       {id:'tn1',stage:'S1',name:'S1_2026-04-09_*_run1',status:'DONE',param:'ramp_fit_firstgroup = 1',note:'',files:[],collapsed:false,children:[
         {id:'tn2',stage:'S2',name:'S2_2026-04-10_*_run1',status:'DONE',param:'',note:'',files:[],collapsed:false,children:[
@@ -411,7 +465,7 @@ let tasks=[
       ]}
     ]
   },
-  {id:'t3',title:'提取光谱的孔径选择方案',status:'todo',priority:'med',category:'cat-analysis',due:'2026-05-30',notes:'确定最优孔径参数',files:[],tree:[]}
+  {id:'t3',title:'提取光谱的孔径选择方案',status:'todo',priority:'med',category:'cat-analysis',due:'2026-05-30',notes:'确定最优孔径参数',files:[],tree:[],checklist:[],parentTaskId:null}
 ];
 
 let taskFiles={},nodeFiles={},nextTaskId=10,nextNodeId=100;
@@ -442,7 +496,13 @@ function cardHTML(t){
   const dc=dueCls(t.due);
   const hasTree=t.tree&&t.tree.length>0;
   const isAct=t.id===activeTaskId;
-  const footer=hasTree?`<div class="card-footer"><span class="badge-tree">&#x2442; tree</span></div>`:'';
+  const cl=t.checklist||[];
+  const clTotal=cl.length;
+  const clDone=cl.filter(i=>i.done&&!i.promotedTaskId).length + cl.filter(i=>i.promotedTaskId).length;
+  const clPct=clTotal>0?Math.round(clDone/clTotal*100):0;
+  const clHtml=clTotal>0?`<div class="card-cl-bar"><div class="card-cl-prog"><div class="card-cl-fill" style="width:${clPct}%"></div></div><span>${clDone}/${clTotal}</span></div>`:'';
+  const footerContent=[clHtml,hasTree?'<span class="badge-tree">&#x2442; tree</span>':''].filter(Boolean).join('');
+  const footer=footerContent?`<div class="card-footer" style="justify-content:space-between">${clHtml}<div class="card-badges">${hasTree?'<span class="badge-tree">&#x2442; tree</span>':''}</div></div>`:'';
   return `<div class="task-card ${t.category}${isAct?' active':''}" draggable="true" ondragstart="dragStart(event,'${t.id}')" ondragend="dragEnd(event)" onclick="openTask('${t.id}')">
     <div class="card-inner">
       <div class="card-top"><div class="card-title">${t.title}</div><span class="pri-badge p-${t.priority}">${t.priority.toUpperCase()}</span></div>
@@ -464,10 +524,19 @@ function openTask(id){
   document.getElementById('dp-category').value=t.category;
   setDateValue('dp', t.due||'');
   document.getElementById('dp-notes').value=t.notes||'';
+  // ensure checklist array exists
+  if(!t.checklist) t.checklist=[];
+  if(t.parentTaskId===undefined) t.parentTaskId=null;
+  renderParentLink();
   renderTaskFiles(id);renderTree();switchTab(activeTab);renderKanban();
 }
 
 function closeDetail(){activeTaskId=null;document.getElementById('detailPanel').classList.remove('open');closeNodeEditor();renderKanban();}
+function handleKanbanClick(e){
+  // close detail if click is not on a task card or its children
+  if(!activeTaskId) return;
+  if(!e.target.closest('.task-card')) closeDetail();
+}
 
 function saveDetail(){
   const t=getTask(activeTaskId);
@@ -490,11 +559,13 @@ function deleteActive(){
 
 function switchTab(name){
   activeTab=name;
-  document.querySelectorAll('.dp-tab').forEach((b,i)=>b.classList.toggle('active',['info','files','pipeline'][i]===name));
+  document.querySelectorAll('.dp-tab').forEach((b,i)=>b.classList.toggle('active',['info','checklist','files','pipeline'][i]===name));
   document.querySelectorAll('.tab-pane').forEach(el=>el.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
   if(name==='pipeline')renderTree();
   if(name==='files'){rebindFiles();renderTaskFiles(activeTaskId);}
+  if(name==='checklist')renderChecklist();
+  if(name==='info')renderParentLink();
 }
 
 function rebindFiles(){
@@ -672,13 +743,24 @@ function pickDiff(id){if(!diffA||(diffA&&diffB)){diffA=id;diffB=null;document.ge
 function showDiff(){const t=getTask(activeTaskId);const a=findNode(diffA,t.tree),b=findNode(diffB,t.tree);if(!a||!b)return;const fa={stage:a.stage,status:a.status,param:a.param||'—',note:a.note||'—'};const fb={stage:b.stage,status:b.status,param:b.param||'—',note:b.note||'—'};const rows=Object.keys(fa).map(k=>`<tr class="${fa[k]===fb[k]?'':'diff-row-changed'}"><td class="diff-key">${k}</td><td>${fa[k]}</td><td>${fb[k]}</td></tr>`).join('');document.getElementById('diffContent').innerHTML=`<table class="diff-tbl"><tr><th>Field</th><th style="color:var(--accent)">A: ${a.name.split('/').pop()}</th><th style="color:var(--run)">B: ${b.name.split('/').pop()}</th></tr>${rows}</table>`;document.getElementById('diffStrip').classList.add('on');}
 function clearDiff(){diffA=null;diffB=null;document.getElementById('diffStrip').classList.remove('on');document.getElementById('diffHint').textContent='';renderTree();}
 
-function openNewTaskModal(defaultStatus){document.getElementById('m-status').value=defaultStatus||'todo';document.getElementById('m-priority').value='med';document.getElementById('m-category').value='cat-analysis';document.getElementById('m-title').value='';setDateValue('m',''); const td=today(); setDateValue('m',`${td.y}-${String(td.m+1).padStart(2,'0')}-${String(td.d).padStart(2,'0')}`);document.getElementById('taskModal').classList.add('on');setTimeout(()=>document.getElementById('m-title').focus(),50);}
-function closeTaskModal(){document.getElementById('taskModal').classList.remove('on');}
+function openNewTaskModal(defaultStatus){_promoteItemId=null;_promoteParentId=null;document.getElementById('m-status').value=defaultStatus||'todo';document.getElementById('m-priority').value='med';document.getElementById('m-category').value='cat-analysis';document.getElementById('m-title').value='';setDateValue('m',''); const td=today(); setDateValue('m',`${td.y}-${String(td.m+1).padStart(2,'0')}-${String(td.d).padStart(2,'0')}`);document.getElementById('taskModal').classList.add('on');setTimeout(()=>document.getElementById('m-title').focus(),50);}
+function closeTaskModal(){document.getElementById('taskModal').classList.remove('on');_promoteItemId=null;_promoteParentId=null;const _mh=document.getElementById('modalH');if(_mh)_mh.textContent='NEW TASK';}
 function closeModalOut(e){if(e.target===document.getElementById('taskModal'))closeTaskModal();}
 function saveNewTask(){
   const title=document.getElementById('m-title').value.trim();if(!title){alert('Title required');return;}
-  const t={id:'t'+(nextTaskId++),title,status:document.getElementById('m-status').value,priority:document.getElementById('m-priority').value,category:document.getElementById('m-category').value,due:getDateValue('m'),notes:'',files:[],tree:[]};
-  tasks.push(t);closeTaskModal();renderKanban();openTask(t.id);
+  const t={id:'t'+(nextTaskId++),title,status:document.getElementById('m-status').value,priority:document.getElementById('m-priority').value,category:document.getElementById('m-category').value,due:getDateValue('m'),notes:'',files:[],tree:[],checklist:[],parentTaskId:_promoteParentId||null};
+  tasks.push(t);
+  // handle promotion
+  if(_promoteItemId && _promoteParentId){
+    const parent=getTask(_promoteParentId);
+    if(parent){
+      const item=parent.checklist.find(i=>i.id===_promoteItemId);
+      if(item){item.promotedTaskId=t.id;item.done=true;}
+    }
+  }
+  _promoteItemId=null;_promoteParentId=null;
+  const _mh=document.getElementById('modalH');if(_mh)_mh.textContent='NEW TASK';
+  closeTaskModal();renderKanban();openTask(t.id);
 }
 
 
@@ -768,15 +850,17 @@ function calClear() {
 function updateDateBtn(target, iso) {
   const btn     = document.getElementById(target + '-due-btn');
   const display = document.getElementById(target + '-due-display');
+  if (!btn || !display) return;   // guard: element may not exist yet
   if (iso) {
     const d = new Date(iso + 'T00:00:00');
     display.textContent = d.toLocaleDateString('zh-CN', { year:'numeric', month:'short', day:'numeric' });
     btn.classList.remove('empty');
+    btn.dataset.value = iso;
   } else {
     display.textContent = 'Select date...';
     btn.classList.add('empty');
+    btn.dataset.value = '';
   }
-  btn.dataset.value = iso;
 }
 
 function getDateValue(target) {
@@ -790,9 +874,154 @@ function setDateValue(target, iso) {
   } else {
     calSelectedDate[target] = null;
   }
-  updateDateBtn(target, iso || '');
+  updateDateBtn(target, iso || '');  // null-safe inside updateDateBtn
 }
 
+
+
+// ══════════════════════════════════════════════════════
+// CHECKLIST
+// ══════════════════════════════════════════════════════
+let clNextId = 50;
+
+function renderChecklist() {
+  const t = getTask(activeTaskId);
+  if (!t) return;
+  if (!t.checklist) t.checklist = [];
+
+  const cl = t.checklist;
+  const real = cl.filter(i => !i.promotedTaskId);
+  const done = cl.filter(i => i.done && !i.promotedTaskId).length + cl.filter(i=>i.promotedTaskId).length;
+  const total = cl.length;
+  const pct = total > 0 ? Math.round(done/total*100) : 0;
+
+  // progress
+  const progRow = document.getElementById('cl-progress-row');
+  if (progRow) {
+    progRow.style.display = total > 0 ? 'flex' : 'none';
+    document.getElementById('cl-prog-fill').style.width = pct + '%';
+    document.getElementById('cl-prog-label').textContent = done + '/' + total;
+  }
+
+  // parent link in checklist tab
+  renderClParentLink();
+
+  // items
+  const list = document.getElementById('cl-list');
+  if (!list) return;
+  list.innerHTML = cl.map(item => {
+    if (item.promotedTaskId) {
+      const pt = getTask(item.promotedTaskId);
+      const ptTitle = pt ? (pt.title.length>30?pt.title.slice(0,30)+'...':pt.title) : '(deleted)';
+      return `<div class="cl-item promoted">
+        <input type="checkbox" class="cl-check" checked disabled>
+        <a class="cl-promoted-link" onclick="openTask('${item.promotedTaskId}')">
+          <span class="cl-promoted-icon">&#x2197;</span>${ptTitle}
+        </a>
+      </div>`;
+    }
+    return `<div class="cl-item">
+      <input type="checkbox" class="cl-check" ${item.done?'checked':''} onchange="clToggle('${item.id}',this.checked)">
+      <input class="cl-text${item.done?' done-text':''}" value="${item.text.replace(/"/g,'&quot;')}" onchange="clEdit('${item.id}',this.value)" onblur="clEdit('${item.id}',this.value)">
+      <div class="cl-item-actions">
+        <button class="cl-action-btn promote" onclick="clPromote('${item.id}')" title="Promote to task">&#x2191; Promote</button>
+        <button class="cl-action-btn del" onclick="clDelete('${item.id}')">&#x2715;</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderClParentLink() {
+  const t = getTask(activeTaskId);
+  const el = document.getElementById('cl-parent-link');
+  if (!el) return;
+  if (t && t.parentTaskId) {
+    const parent = getTask(t.parentTaskId);
+    if (parent) {
+      const sh = parent.title.length>34?parent.title.slice(0,34)+'...':parent.title;
+      el.innerHTML = `<div class="parent-link" onclick="openTask('${parent.id}')"><span class="parent-link-icon">&#x21A9;</span><span>From: ${sh}</span></div>`;
+      return;
+    }
+  }
+  el.innerHTML = '';
+}
+
+function renderParentLink() {
+  const t = getTask(activeTaskId);
+  const el = document.getElementById('dp-parent-link');
+  if (!el) return;
+  if (t && t.parentTaskId) {
+    const parent = getTask(t.parentTaskId);
+    if (parent) {
+      const sh = parent.title.length>34?parent.title.slice(0,34)+'...':parent.title;
+      el.innerHTML = `<div class="parent-link" style="margin-bottom:12px" onclick="openTask('${parent.id}')"><span class="parent-link-icon">&#x21A9;</span><span>From: ${sh}</span></div>`;
+      return;
+    }
+  }
+  el.innerHTML = '';
+}
+
+function clToggle(itemId, checked) {
+  const t = getTask(activeTaskId);
+  const item = t.checklist.find(i => i.id === itemId);
+  if (item) { item.done = checked; renderChecklist(); renderKanban(); }
+}
+
+function clEdit(itemId, val) {
+  const t = getTask(activeTaskId);
+  const item = t.checklist.find(i => i.id === itemId);
+  if (item) item.text = val.trim() || item.text;
+}
+
+function clDelete(itemId) {
+  const t = getTask(activeTaskId);
+  t.checklist = t.checklist.filter(i => i.id !== itemId);
+  renderChecklist(); renderKanban();
+}
+
+function clAddItem() {
+  const input = document.getElementById('cl-add-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const t = getTask(activeTaskId);
+  t.checklist.push({ id: 'ci' + (clNextId++), text, done: false, promotedTaskId: null });
+  input.value = '';
+  renderChecklist(); renderKanban();
+}
+
+function clAddOnEnter(e) { if (e.key === 'Enter') clAddItem(); }
+
+function clPromote(itemId) {
+  const t = getTask(activeTaskId);
+  const item = t.checklist.find(i => i.id === itemId);
+  if (!item) return;
+  _promoteItemId   = itemId;
+  _promoteParentId = activeTaskId;
+  _promoteDue      = t.due || '';
+  _promoteText     = item.text;
+  // set non-date fields immediately (these elements always exist)
+  document.getElementById('m-status').value   = 'todo';
+  document.getElementById('m-priority').value = t.priority;
+  document.getElementById('m-category').value = t.category;
+  const mh = document.getElementById('modalH'); if(mh) mh.textContent = 'PROMOTE TO TASK';
+  // reset calendar state
+  calSelectedDate['m'] = null;
+  // open modal
+  document.getElementById('taskModal').classList.add('on');
+  // fill title + date after modal is painted (updateDateBtn needs m-due-btn in DOM)
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const titleEl = document.getElementById('m-title');
+      if (titleEl) { titleEl.value = _promoteText; titleEl.focus(); }
+      updateDateBtn('m', _promoteDue);   // null-safe now
+    });
+  });
+}
+
+let _promoteItemId = null;
+let _promoteParentId = null;
+let _promoteDue = '';
+let _promoteText = '';
 
 // ══════════════════════════════════════════════════════
 // DRAG AND DROP
