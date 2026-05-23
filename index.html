@@ -252,7 +252,7 @@ table.diff-tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-
 .cl-promoted-icon{font-size:0.65rem;flex-shrink:0;}
 .cl-item-actions{display:flex;gap:3px;opacity:0;transition:opacity 0.12s;flex-shrink:0;}
 .cl-item:hover .cl-item-actions{opacity:1;}
-.cl-item.promoted .cl-item-actions{display:none;}
+.cl-item.promoted:hover .cl-item-actions{opacity:1 !important;}
 .cl-action-btn{font-family:var(--mono);font-size:0.56rem;padding:2px 6px;border-radius:3px;border:1px solid var(--border2);background:var(--surf);color:var(--muted2);cursor:pointer;white-space:nowrap;transition:all 0.11s;}
 .cl-action-btn:hover{border-color:var(--accent);color:var(--accent);}
 .cl-action-btn.promote:hover{border-color:var(--cat-analysis);color:var(--cat-analysis);}
@@ -1068,11 +1068,17 @@ function renderChecklist() {
     if (item.promotedTaskId) {
       const pt = getTask(item.promotedTaskId);
       const ptTitle = pt ? (pt.title.length>30?pt.title.slice(0,30)+'...':pt.title) : '(deleted)';
-      return `<div class="cl-item promoted">
-        <input type="checkbox" class="cl-check" checked disabled>
-        <a class="cl-promoted-link" onclick="openTask('${item.promotedTaskId}')">
+      const ptStatus = pt ? pt.status : null;
+      const isDone = ptStatus === 'done';
+      return `<div class="cl-item promoted" style="opacity:0.75">
+        <input type="checkbox" class="cl-check" ${isDone?'checked':''} disabled title="${ptStatus||'promoted'}">
+        <a class="cl-promoted-link" onclick="openTask('${item.promotedTaskId}')" style="font-style:italic">
           <span class="cl-promoted-icon">&#x2197;</span>${ptTitle}
+          <span style="font-size:0.55rem;color:var(--muted2);margin-left:4px">[${ptStatus||'todo'}]</span>
         </a>
+        <div class="cl-item-actions" style="opacity:0;transition:opacity 0.12s">
+          <button class="cl-action-btn del" onclick="clDeletePromoted('${item.id}')" title="Remove link">&#x2715;</button>
+        </div>
       </div>`;
     }
     return `<div class="cl-item">
@@ -1131,6 +1137,21 @@ function clEdit(itemId, val) {
 function clDelete(itemId) {
   const t = getTask(activeTaskId);
   t.checklist = t.checklist.filter(i => i.id !== itemId);
+  renderChecklist(); renderKanban();
+}
+
+function clDeletePromoted(itemId) {
+  const t = getTask(activeTaskId);
+  const item = t.checklist.find(i => i.id === itemId);
+  if (!item) return;
+  // unlink the promoted task's parentTaskId
+  if (item.promotedTaskId) {
+    const child = getTask(item.promotedTaskId);
+    if (child) child.parentTaskId = null;
+  }
+  // restore item to normal checkbox (un-promote)
+  item.promotedTaskId = null;
+  item.done = false;
   renderChecklist(); renderKanban();
 }
 
