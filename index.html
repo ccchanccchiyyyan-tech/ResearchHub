@@ -408,9 +408,9 @@ canvas.stats-canvas{width:100%;display:block;}
 </head>
 <body>
 
-<header>
+<header id="mainHeader" style="display:none">
   <div class="brand">
-    <span class="brand-logo">RESEARCH HUB</span>
+    <span class="brand-logo" onclick="goToLanding()" style="cursor:pointer" title="Back to home">RESEARCH HUB</span>
     <span class="brand-sub">CYAN · RUG / ASTRONOMY</span>
   </div>
   <div class="header-right">
@@ -425,9 +425,20 @@ canvas.stats-canvas{width:100%;display:block;}
   </div>
 </header>
 
+<!-- Landing Page -->
+<div id="landingPage" style="display:flex;flex:1;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);position:relative">
+  <div style="text-align:center">
+    <div style="font-family:var(--mono);font-size:0.7rem;color:var(--muted2);letter-spacing:0.2em;text-transform:uppercase;margin-bottom:16px">Personal Page</div>
+    <div style="font-family:var(--ui);font-size:2.8rem;font-weight:900;color:var(--text);letter-spacing:-0.03em;margin-bottom:8px">Cyan</div>
+    <div style="font-family:var(--mono);font-size:0.78rem;color:var(--muted2);letter-spacing:0.06em">Astronomy · University of Groningen</div>
+  </div>
+  <!-- Low-key entry button -->
+  <button onclick="enterHub()" style="position:fixed;bottom:24px;right:24px;background:transparent;border:1px solid var(--border);border-radius:50%;width:32px;height:32px;cursor:pointer;color:var(--muted);font-size:0.7rem;display:flex;align-items:center;justify-content:center;transition:all 0.2s;font-family:var(--mono)" title="Enter" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">&#x2192;</button>
+</div>
+
 <div id="statsView" style="display:none;flex:1;overflow-y:auto;padding:20px 24px 40px;"></div>
 <div id="mobileBackdrop" onclick="closeDetail()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:99;backdrop-filter:blur(2px)"></div>
-<div class="app-body" id="kanbanView">
+<div class="app-body" id="kanbanView" style="display:none">
   <div class="kanban-area" id="kanbanArea" onclick="handleKanbanClick(event)">
     <div class="kol">
       <div class="kol-head todo"><div class="kol-title"><span class="kol-dot"></span>To Do</div><span class="kol-count" id="cnt-todo">0</span></div>
@@ -578,41 +589,7 @@ canvas.stats-canvas{width:100%;display:block;}
 const catLabel={'cat-analysis':'Data Analysis','cat-lit':'Literature','cat-writing':'Writing','cat-quentin':'Quentin','cat-code':'Code/Dev','cat-idea':'Idea'};
 const nextStage={S1:'S2',S2:'S3',S3:'S4',S4:'S5',S5:'S6',S6:'S6'};
 
-let tasks=[
-  {id:'t1',title:'整理可用的 pipeline 配置并发送给 Quentin',status:'todo',priority:'high',category:'cat-quentin',due:'2026-05-27',notes:'整理完毕后通过 Slack 发送',files:[],tree:[],checklist:[],parentTaskId:null,createdAt:'2026-05-23',completedAt:null,timerSessions:[]},
-  {id:'t2',title:'整理不同假设下的光谱结果对比',status:'todo',priority:'high',category:'cat-analysis',due:'2026-05-27',notes:'对比各假设之间的差异，准备图表',files:[],checklist:[],parentTaskId:null,
-    tree:[
-      {id:'tn1',stage:'S1',name:'S1_2026-04-09_*_run1',status:'DONE',param:'ramp_fit_firstgroup = 1',note:'',files:[],collapsed:false,children:[
-        {id:'tn2',stage:'S2',name:'S2_2026-04-10_*_run1',status:'DONE',param:'',note:'',files:[],collapsed:false,children:[
-          {id:'tn3',stage:'S3',name:'S3_2026-04-10_*_run1/ap4_bg6',status:'DONE',param:'',note:'多个孔径组合',files:[],collapsed:false,children:[
-            {id:'tn4',stage:'S4',name:'S4_2026-04-14_*_run2/ap4_bg6',status:'DONE',param:'计算 EXOTiC-LD',note:'',files:[],collapsed:false,children:[
-              {id:'tn5',stage:'S5',name:'S5_2026-04-15_*_run6/ap4_bg6',status:'STOP',param:'EXOTiC-LD: 4para',note:'',files:[],collapsed:false,children:[]},
-              {id:'tn6',stage:'S5',name:'S5_2026-04-20_*_run2/ap4_bg6',status:'DONE',param:'EXOTiC-LD: 4para',note:'',files:[{name:'2026-04-21_s6_ld-4.log',type:'log'}],collapsed:false,children:[
-                {id:'tn7',stage:'S6',name:'S6_2026-04-21_*_run2/ap4_bg6',status:'DONE',param:'',note:'',files:[],collapsed:false,children:[]}
-              ]},
-              {id:'tn8',stage:'S5',name:'S5_2026-04-15_*_run2/ap4_bg6',status:'DONE',param:'EXOTiC-LD: quadratic',note:'',files:[],collapsed:false,children:[
-                {id:'tn9',stage:'S6',name:'S6_2026-04-16_*_run1/ap4_bg6',status:'DONE',param:'',note:'',files:[{name:'2026-04-16_S6.log',type:'log'}],collapsed:false,children:[]}
-              ]}
-            ]}
-          ]}
-        ]}
-      ]},
-      {id:'tn10',stage:'S1',name:'S1_2026-04-09_*_run2',status:'DONE',param:'ramp_fit_firstgroup = 0',note:'',files:[],collapsed:false,children:[
-        {id:'tn11',stage:'S2',name:'S2_2026-04-15_*_run1',status:'DONE',param:'',note:'',files:[],collapsed:false,children:[
-          {id:'tn12',stage:'S4',name:'S4_2026-04-15_*_run1/ap4_bg6',status:'DONE',param:'',note:'',files:[],collapsed:false,children:[
-            {id:'tn13',stage:'S5',name:'S5_2026-04-20_*_run1/ap4_bg6',status:'DONE',param:'EXOTiC-LD: 4para',note:'',files:[],collapsed:false,children:[
-              {id:'tn14',stage:'S6',name:'S6_2026-04-21_*_run2/ap4_bg6',status:'DONE',param:'',note:'',files:[{name:'2026-04-20_s5.log',type:'log'}],collapsed:false,children:[]}
-            ]},
-            {id:'tn15',stage:'S5',name:'S5_2026-04-15_*_run5/ap4_bg6',status:'DONE',param:'EXOTiC-LD: quadratic',note:'',files:[],collapsed:false,children:[
-              {id:'tn16',stage:'S6',name:'S6_2026-04-21_*_run2b/ap4_bg6',status:'DONE',param:'',note:'',files:[],collapsed:false,children:[]}
-            ]}
-          ]}
-        ]}
-      ]}
-    ]
-  },
-  {id:'t3',title:'提取光谱的孔径选择方案',status:'todo',priority:'med',category:'cat-analysis',due:'2026-05-30',notes:'确定最优孔径参数',files:[],tree:[],checklist:[],parentTaskId:null,createdAt:'2026-05-23',completedAt:null,timerSessions:[]}
-];
+let tasks=[]
 
 let taskFiles={},nodeFiles={},nextTaskId=10,nextNodeId=100;
 let activeTaskId=null,activeTab='info';
@@ -1712,6 +1689,29 @@ function drop(e, status) {
 }
 
 // ══════════════════════════════════════════════════════
+// LANDING PAGE
+// ══════════════════════════════════════════════════════
+function goToLanding() {
+  closeDetail();
+  document.getElementById('landingPage').style.display = 'flex';
+  document.getElementById('mainHeader').style.display = 'none';
+  document.getElementById('kanbanView').style.display = 'none';
+  document.getElementById('statsView').style.display = 'none';
+}
+
+function enterHub() {
+  // Show PAT settings if not configured, otherwise go straight to pull
+  document.getElementById('landingPage').style.display = 'none';
+  document.getElementById('mainHeader').style.display = 'flex';
+  document.getElementById('kanbanView').style.display = 'flex';
+  if (!getPAT()) {
+    openSettings();
+  } else {
+    loadFromGist();
+  }
+}
+
+// ══════════════════════════════════════════════════════
 // GIST SYNC
 // ══════════════════════════════════════════════════════
 const GIST_ID   = '7e342b65c5c5c15414752f3f0ba9635d';
@@ -1835,17 +1835,12 @@ function saveSettings() {
 
 // ══ INIT ══
 (async () => {
-  // Detect Claude preview environment (has window.storage but no real hostname)
+  // Always show landing page first - data loads via Gist on enter
   const isClaudePreview = typeof window.storage !== 'undefined';
   if (isClaudePreview) {
-    // Always start fresh in Claude preview - never load stale test data
     try { await window.storage.delete('rh_data'); } catch(e) {}
-    renderKanban();
-  } else {
-    // Real deployment: load from localStorage
-    await loadLocal();
-    renderKanban();
   }
+  // Show landing page, kanban is hidden until enterHub() is called
 })();
 
 </script>
