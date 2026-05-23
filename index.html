@@ -349,6 +349,61 @@ table.diff-tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-
   .cal-popup { width: 260px !important; left: 50% !important; transform: translateX(-50%); }
 }
 
+
+/* TIMER */
+.timer-bar{display:flex;align-items:center;gap:10px;padding:7px 12px;background:rgba(210,153,34,0.08);border:1px solid rgba(210,153,34,0.2);border-radius:6px;margin-bottom:14px;}
+.timer-display{font-family:var(--mono);font-size:1.1rem;font-weight:700;color:var(--run);letter-spacing:0.08em;flex:1;}
+.timer-btn{font-family:var(--mono);font-size:0.62rem;padding:4px 10px;border-radius:4px;border:1px solid;cursor:pointer;transition:all 0.12s;font-weight:600;}
+.timer-btn.start{border-color:var(--done);color:var(--done);background:rgba(63,185,80,0.08);}
+.timer-btn.start:hover{background:rgba(63,185,80,0.16);}
+.timer-btn.pause{border-color:var(--run);color:var(--run);background:rgba(210,153,34,0.08);}
+.timer-btn.pause:hover{background:rgba(210,153,34,0.16);}
+.timer-btn.stop{border-color:var(--stop);color:var(--stop);background:rgba(248,81,73,0.08);}
+.timer-btn.stop:hover{background:rgba(248,81,73,0.16);}
+.timer-total{font-family:var(--mono);font-size:0.62rem;color:var(--muted2);}
+.session-list{margin-top:8px;}
+.session-item{display:flex;align-items:center;justify-content:space-between;font-family:var(--mono);font-size:0.6rem;color:var(--muted2);padding:3px 0;border-bottom:1px solid var(--border);}
+.session-item:last-child{border-bottom:none;}
+
+/* STATS VIEW */
+.stats-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+.stats-title{font-family:var(--mono);font-size:0.9rem;font-weight:700;color:var(--accent);letter-spacing:0.06em;}
+.stats-filters{display:flex;gap:8px;flex-wrap:wrap;}
+.stats-filter-btn{font-family:var(--mono);font-size:0.6rem;padding:3px 10px;border-radius:10px;border:1px solid var(--border2);background:transparent;color:var(--muted2);cursor:pointer;transition:all 0.12s;}
+.stats-filter-btn:hover,.stats-filter-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(88,166,255,0.08);}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.stats-card{background:var(--surf);border:1px solid var(--border);border-radius:var(--r);padding:16px;}
+.stats-card-title{font-family:var(--mono);font-size:0.65rem;color:var(--muted2);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;}
+.stats-card.full{grid-column:1/-1;}
+canvas.stats-canvas{width:100%;display:block;}
+.heatmap-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:4px;}
+.heatmap-cell{aspect-ratio:1;border-radius:2px;cursor:default;transition:opacity 0.12s;}
+.heatmap-cell:hover{opacity:0.7;}
+.heatmap-legend{display:flex;align-items:center;gap:6px;margin-top:8px;font-family:var(--mono);font-size:0.56rem;color:var(--muted2);}
+.heatmap-legend-cells{display:flex;gap:2px;}
+.heatmap-legend-cell{width:10px;height:10px;border-radius:2px;}
+.stats-empty{font-family:var(--mono);font-size:0.65rem;color:var(--muted);text-align:center;padding:32px 0;}
+.stats-summary-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+.summary-stat{background:var(--surf);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;}
+.summary-stat-num{font-family:var(--mono);font-size:1.2rem;font-weight:800;color:var(--accent);}
+.summary-stat-label{font-family:var(--mono);font-size:0.58rem;color:var(--muted2);letter-spacing:0.06em;margin-top:2px;}
+.detail-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:0.62rem;}
+.detail-table th{text-align:left;padding:5px 8px;color:var(--muted2);border-bottom:1px solid var(--border);font-weight:500;}
+.detail-table td{padding:5px 8px;border-bottom:1px solid var(--border);color:var(--text);}
+.detail-table tr:last-child td{border-bottom:none;}
+
+@media(max-width:700px){
+  .stats-grid{grid-template-columns:1fr;}
+  .stats-card.full{grid-column:1;}
+  .stats-summary-row{grid-template-columns:1fr 1fr;}
+}
+
+
+.session-edit-input{font-family:var(--mono);font-size:0.6rem;color:var(--text);background:transparent;border:none;border-bottom:1px solid var(--border);outline:none;width:70px;text-align:right;cursor:text;padding:1px 2px;transition:border-color 0.12s;}
+.session-edit-input:focus{border-color:var(--accent);}
+.session-del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.75rem;padding:0 2px;margin-left:4px;transition:color 0.12s;}
+.session-del-btn:hover{color:var(--stop);}
+
 </style>
 </head>
 <body>
@@ -361,6 +416,8 @@ table.diff-tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-
   <div class="header-right">
     <span class="stat-pill" id="statPill">— tasks</span>
     <span class="stat-pill" id="syncStatus" style="border-color:var(--border2);color:var(--muted)">⬤ local</span>
+    <button class="hbtn" id="timerGlobalBtn" style="display:none" onclick="jumpToActiveTimer()">&#x23F1; 0:00</button>
+    <button class="hbtn" onclick="toggleStatsView()">&#x1F4CA; Stats</button>
     <button class="hbtn" onclick="loadFromGist()" id="pullBtn">&#x2193; Pull</button>
     <button class="hbtn" onclick="syncToGist()" id="saveBtn">&#x2191; Save</button>
     <button class="hbtn" onclick="openSettings()">&#x2699; Settings</button>
@@ -368,8 +425,9 @@ table.diff-tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-
   </div>
 </header>
 
+<div id="statsView" style="display:none;flex:1;overflow-y:auto;padding:20px 24px 40px;"></div>
 <div id="mobileBackdrop" onclick="closeDetail()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:99;backdrop-filter:blur(2px)"></div>
-<div class="app-body">
+<div class="app-body" id="kanbanView">
   <div class="kanban-area" id="kanbanArea" onclick="handleKanbanClick(event)">
     <div class="kol">
       <div class="kol-head todo"><div class="kol-title"><span class="kol-dot"></span>To Do</div><span class="kol-count" id="cnt-todo">0</span></div>
@@ -399,6 +457,7 @@ table.diff-tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-
     <div class="dp-tabs">
       <button class="dp-tab active" onclick="switchTab('info')">Info</button>
       <button class="dp-tab" onclick="switchTab('checklist')">Checklist</button>
+      <button class="dp-tab" onclick="switchTab('timer')" id="timerTab">&#x23F1; Timer</button>
       <button class="dp-tab" onclick="switchTab('files')">Files</button>
       <button class="dp-tab" onclick="switchTab('pipeline')">Pipeline Tree</button>
     </div>
@@ -429,6 +488,13 @@ table.diff-tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-
             <input class="cl-add-input" id="cl-add-input" placeholder="Add item..." onkeydown="clAddOnEnter(event)">
             <button class="cl-add-btn" onclick="clAddItem()">+ Add</button>
           </div>
+        </div>
+      </div>
+      <div class="tab-pane" id="tab-timer">
+        <div style="padding:16px 16px 32px">
+          <div id="timer-bar-area"></div>
+          <div class="dp-label" style="margin-bottom:8px">Session History</div>
+          <div class="session-list" id="session-list"></div>
         </div>
       </div>
       <div class="tab-pane" id="tab-files">
@@ -513,7 +579,7 @@ const catLabel={'cat-analysis':'Data Analysis','cat-lit':'Literature','cat-writi
 const nextStage={S1:'S2',S2:'S3',S3:'S4',S4:'S5',S5:'S6',S6:'S6'};
 
 let tasks=[
-  {id:'t1',title:'整理可用的 pipeline 配置并发送给 Quentin',status:'todo',priority:'high',category:'cat-quentin',due:'2026-05-27',notes:'整理完毕后通过 Slack 发送',files:[],tree:[],checklist:[],parentTaskId:null},
+  {id:'t1',title:'整理可用的 pipeline 配置并发送给 Quentin',status:'todo',priority:'high',category:'cat-quentin',due:'2026-05-27',notes:'整理完毕后通过 Slack 发送',files:[],tree:[],checklist:[],parentTaskId:null,createdAt:'2026-05-23',completedAt:null,timerSessions:[]},
   {id:'t2',title:'整理不同假设下的光谱结果对比',status:'todo',priority:'high',category:'cat-analysis',due:'2026-05-27',notes:'对比各假设之间的差异，准备图表',files:[],checklist:[{id:'ci1',text:'跑 EXOTiC-LD: 4para 方案',done:false,promotedTaskId:null},{id:'ci2',text:'跑 EXOTiC-LD: quadratic 方案',done:false,promotedTaskId:null},{id:'ci3',text:'生成结果对比图',done:false,promotedTaskId:null}],parentTaskId:null,
     tree:[
       {id:'tn1',stage:'S1',name:'S1_2026-04-09_*_run1',status:'DONE',param:'ramp_fit_firstgroup = 1',note:'',files:[],collapsed:false,children:[
@@ -545,7 +611,7 @@ let tasks=[
       ]}
     ]
   },
-  {id:'t3',title:'提取光谱的孔径选择方案',status:'todo',priority:'med',category:'cat-analysis',due:'2026-05-30',notes:'确定最优孔径参数',files:[],tree:[],checklist:[],parentTaskId:null}
+  {id:'t3',title:'提取光谱的孔径选择方案',status:'todo',priority:'med',category:'cat-analysis',due:'2026-05-30',notes:'确定最优孔径参数',files:[],tree:[],checklist:[],parentTaskId:null,createdAt:'2026-05-23',completedAt:null,timerSessions:[]}
 ];
 
 let taskFiles={},nodeFiles={},nextTaskId=10,nextNodeId=100;
@@ -647,13 +713,14 @@ function deleteActive(){
 
 function switchTab(name){
   activeTab=name;
-  document.querySelectorAll('.dp-tab').forEach((b,i)=>b.classList.toggle('active',['info','checklist','files','pipeline'][i]===name));
+  document.querySelectorAll('.dp-tab').forEach((b,i)=>b.classList.toggle('active',['info','checklist','timer','files','pipeline'][i]===name));
   document.querySelectorAll('.tab-pane').forEach(el=>el.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
   if(name==='pipeline')renderTree();
   if(name==='files'){rebindFiles();renderTaskFiles(activeTaskId);}
   if(name==='checklist')renderChecklist();
   if(name==='info')renderParentLink();
+  if(name==='timer')renderTimerTab();
 }
 
 function rebindFiles(){
@@ -836,7 +903,7 @@ function closeTaskModal(){document.getElementById('taskModal').classList.remove(
 function closeModalOut(e){if(e.target===document.getElementById('taskModal'))closeTaskModal();}
 function saveNewTask(){
   const title=document.getElementById('m-title').value.trim();if(!title){alert('Title required');return;}
-  const t={id:'t'+(nextTaskId++),title,status:document.getElementById('m-status').value,priority:document.getElementById('m-priority').value,category:document.getElementById('m-category').value,due:getDateValue('m'),notes:'',files:[],tree:[],checklist:[],parentTaskId:_promoteParentId||null};
+  const now=new Date().toISOString().slice(0,10);const t={id:'t'+(nextTaskId++),title,status:document.getElementById('m-status').value,priority:document.getElementById('m-priority').value,category:document.getElementById('m-category').value,due:getDateValue('m'),notes:'',files:[],tree:[],checklist:[],parentTaskId:_promoteParentId||null,createdAt:now,completedAt:null,timerSessions:[]};
   tasks.push(t);
   // handle promotion
   if(_promoteItemId && _promoteParentId){
@@ -1111,6 +1178,442 @@ let _promoteParentId = null;
 let _promoteDue = '';
 let _promoteText = '';
 
+
+// ══════════════════════════════════════════════════════
+// TIMER
+// ══════════════════════════════════════════════════════
+let timerState = { taskId: null, running: false, startedAt: null, elapsed: 0 };
+let timerInterval = null;
+
+function fmtDuration(ms) {
+  if (!ms || ms < 0) return '0:00';
+  const s = Math.floor(ms/1000);
+  const h = Math.floor(s/3600);
+  const m = Math.floor((s%3600)/60);
+  const sec = s%60;
+  if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+  return `${m}:${String(sec).padStart(2,'0')}`;
+}
+
+function fmtDurationH(ms) {
+  if (!ms || ms<0) return '0h 0m';
+  const totalMin = Math.floor(ms/60000);
+  return `${Math.floor(totalMin/60)}h ${totalMin%60}m`;
+}
+
+function totalTaskTime(t) {
+  if (!t.timerSessions) return 0;
+  return t.timerSessions.reduce((acc,s) => acc + (s.duration||0), 0);
+}
+
+function timerTick() {
+  if (!timerState.running) return;
+  const elapsed = timerState.elapsed + (Date.now() - timerState.startedAt);
+  // update global header button
+  const gb = document.getElementById('timerGlobalBtn');
+  if (gb) gb.textContent = '⏱ ' + fmtDuration(elapsed);
+  // update timer tab if open
+  const disp = document.getElementById('timer-display');
+  if (disp) disp.textContent = fmtDuration(elapsed);
+}
+
+function startTimer() {
+  const t = getTask(activeTaskId);
+  if (!t) return;
+  // stop any other running timer
+  if (timerState.running && timerState.taskId !== activeTaskId) stopTimer();
+  timerState.taskId = activeTaskId;
+  timerState.running = true;
+  timerState.startedAt = Date.now();
+  clearInterval(timerInterval);
+  timerInterval = setInterval(timerTick, 500);
+  // show global button
+  const gb = document.getElementById('timerGlobalBtn');
+  if (gb) gb.style.display = '';
+  renderTimerTab();
+}
+
+function pauseTimer() {
+  if (!timerState.running) return;
+  timerState.elapsed += Date.now() - timerState.startedAt;
+  timerState.running = false;
+  timerState.startedAt = null;
+  clearInterval(timerInterval);
+  renderTimerTab();
+}
+
+function stopTimer() {
+  if (!timerState.taskId) return;
+  // save session
+  const total = timerState.running
+    ? timerState.elapsed + (Date.now() - timerState.startedAt)
+    : timerState.elapsed;
+  if (total > 0) {
+    const t = getTask(timerState.taskId);
+    if (t) {
+      if (!t.timerSessions) t.timerSessions = [];
+      t.timerSessions.push({
+        date: new Date().toISOString().slice(0,10),
+        duration: total
+      });
+    }
+  }
+  clearInterval(timerInterval);
+  timerState = { taskId: null, running: false, startedAt: null, elapsed: 0 };
+  const gb = document.getElementById('timerGlobalBtn');
+  if (gb) gb.style.display = 'none';
+  renderTimerTab();
+  renderKanban();
+}
+
+function jumpToActiveTimer() {
+  if (timerState.taskId) { openTask(timerState.taskId); switchTab('timer'); }
+}
+
+function renderTimerTab() {
+  const t = getTask(activeTaskId);
+  if (!t) return;
+  const isActiveTimer = timerState.taskId === activeTaskId;
+  const running = isActiveTimer && timerState.running;
+  const paused  = isActiveTimer && !timerState.running && timerState.elapsed > 0;
+  const elapsed = isActiveTimer
+    ? (running ? timerState.elapsed + (Date.now()-timerState.startedAt) : timerState.elapsed)
+    : 0;
+  const total = totalTaskTime(t);
+
+  const barArea = document.getElementById('timer-bar-area');
+  if (barArea) {
+    barArea.innerHTML = `
+      <div class="timer-bar">
+        <div>
+          <div class="timer-display" id="timer-display">${fmtDuration(elapsed)}</div>
+          <div class="timer-total">Total: ${fmtDurationH(total + elapsed)}</div>
+        </div>
+        <div style="display:flex;gap:6px;margin-left:auto">
+          ${!running ? `<button class="timer-btn start" onclick="startTimer()">▶ Start</button>` : ''}
+          ${running  ? `<button class="timer-btn pause" onclick="pauseTimer()">⏸ Pause</button>` : ''}
+          ${(running||paused) ? `<button class="timer-btn stop" onclick="stopTimer()">⏹ Stop</button>` : ''}
+        </div>
+      </div>`;
+  }
+
+  const sessList = document.getElementById('session-list');
+  if (sessList) {
+    const sessions = t.timerSessions||[];
+    sessList.innerHTML = sessions.length === 0
+      ? '<div style="font-family:var(--mono);font-size:0.62rem;color:var(--muted);padding:8px 0">No sessions yet.</div>'
+      : sessions.slice().reverse().map((s,i) => {
+          const realIdx = sessions.length-1-i;
+          return `<div class="session-item">
+            <span>${s.date}</span>
+            <input class="session-edit-input" value="${fmtDurationH(s.duration)}"
+              onblur="sessionEditDuration('${t.id}',${realIdx},this.value)"
+              onkeydown="if(event.key==='Enter')this.blur()"
+              title="Edit duration (e.g. 1h 30m or 45m)">
+            <button class="session-del-btn" onclick="sessionDelete('${t.id}',${realIdx})">&#x2715;</button>
+          </div>`;
+        }).join('');
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// STATS VIEW
+// ══════════════════════════════════════════════════════
+let statsFilter = 'all';  // 'all' | category key
+
+function toggleStatsView() {
+  const sv = document.getElementById('statsView');
+  const kv = document.getElementById('kanbanView');
+  const showing = sv.style.display !== 'none';
+  sv.style.display = showing ? 'none' : 'flex';
+  sv.style.flexDirection = 'column';
+  kv.style.display = showing ? 'flex' : 'none';
+  if (!showing) renderStats();
+}
+
+function renderStats() {
+  const sv = document.getElementById('statsView');
+  const cats = ['cat-analysis','cat-lit','cat-writing','cat-quentin','cat-code','cat-idea'];
+  const catColors = {
+    'cat-analysis':'#a78bfa','cat-lit':'#60c8f0','cat-writing':'#f0c060',
+    'cat-quentin':'#f07090','cat-code':'#56d364','cat-idea':'#ff9f43'
+  };
+
+  // filter tasks
+  const filtered = statsFilter === 'all' ? tasks : tasks.filter(t => t.category === statsFilter);
+  const withTime = filtered.filter(t => totalTaskTime(t) > 0);
+
+  // summary numbers
+  const totalMs = withTime.reduce((a,t) => a+totalTaskTime(t), 0);
+  const totalSessions = withTime.reduce((a,t) => a+(t.timerSessions||[]).length, 0);
+  const avgMs = withTime.length ? totalMs/withTime.length : 0;
+  const doneTasks = filtered.filter(t=>t.status==='done').length;
+
+  // category time breakdown
+  const catTime = {};
+  cats.forEach(c => { catTime[c] = 0; });
+  filtered.forEach(t => { if(catTime[t.category]!==undefined) catTime[t.category] += totalTaskTime(t); });
+
+  // heatmap: last 12 weeks
+  const heatData = {};
+  filtered.forEach(t => {
+    (t.timerSessions||[]).forEach(s => {
+      if (!heatData[s.date]) heatData[s.date] = 0;
+      heatData[s.date] += s.duration;
+    });
+  });
+
+  const filterBtns = ['all',...cats].map(c => {
+    const label = c==='all'?'All':catLabel[c]||c;
+    return `<button class="stats-filter-btn${statsFilter===c?' active':''}" onclick="setStatsFilter('${c}')">${label}</button>`;
+  }).join('');
+
+  sv.innerHTML = `
+    <div class="stats-header">
+      <span class="stats-title">📊 STATS</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="hbtn" onclick="toggleStatsView()">✕ Close</button>
+      </div>
+    </div>
+    <div class="stats-filters" style="margin-bottom:16px">${filterBtns}</div>
+    <div class="stats-summary-row">
+      <div class="summary-stat"><div class="summary-stat-num">${fmtDurationH(totalMs)}</div><div class="summary-stat-label">TOTAL TIME</div></div>
+      <div class="summary-stat"><div class="summary-stat-num">${withTime.length}</div><div class="summary-stat-label">TASKS TIMED</div></div>
+      <div class="summary-stat"><div class="summary-stat-num">${totalSessions}</div><div class="summary-stat-label">SESSIONS</div></div>
+      <div class="summary-stat"><div class="summary-stat-num">${fmtDurationH(avgMs)}</div><div class="summary-stat-label">AVG / TASK</div></div>
+    </div>
+    <div class="stats-grid">
+      <div class="stats-card">
+        <div class="stats-card-title">Time by Category (Bar)</div>
+        <canvas id="barChart" class="stats-canvas" height="180"></canvas>
+      </div>
+      <div class="stats-card">
+        <div class="stats-card-title">Time Distribution (Pie)</div>
+        <canvas id="pieChart" class="stats-canvas" height="180"></canvas>
+      </div>
+      <div class="stats-card full">
+        <div class="stats-card-title">Daily Work Heatmap (last 12 weeks)</div>
+        <div id="heatmapArea"></div>
+      </div>
+      <div class="stats-card full">
+        <div class="stats-card-title">Task Detail</div>
+        <div style="overflow-x:auto">
+          <table class="detail-table">
+            <tr><th>Task</th><th>Category</th><th>Status</th><th>Created</th><th>Completed</th><th>Total Time</th><th>Sessions</th></tr>
+            ${filtered.filter(t=>totalTaskTime(t)>0||t.status==='done').map(t=>`
+              <tr>
+                <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${t.title}">${t.title.length>24?t.title.slice(0,24)+'…':t.title}</td>
+                <td><span class="cat-tag ${t.category}">${catLabel[t.category]||t.category}</span></td>
+                <td>${t.status}</td>
+                <td>${t.createdAt||'—'}</td>
+                <td>${t.completedAt||'—'}</td>
+                <td>${fmtDurationH(totalTaskTime(t))}</td>
+                <td>
+                  <details style="font-family:var(--mono);font-size:0.58rem">
+                    <summary style="cursor:pointer;color:var(--muted2)">${(t.timerSessions||[]).length} sessions</summary>
+                    <div style="margin-top:4px;display:flex;flex-direction:column;gap:2px">
+                      ${(t.timerSessions||[]).map((s,i)=>`
+                        <div style="display:flex;align-items:center;gap:6px;padding:2px 0;border-bottom:1px solid var(--border)">
+                          <span style="color:var(--muted2);flex:1">${s.date}</span>
+                          <input class="session-edit-input" value="${fmtDurationH(s.duration)}"
+                            onblur="statsSessionEdit('${t.id}',${i},this.value)"
+                            onkeydown="if(event.key==='Enter')this.blur()"
+                            title="Edit duration">
+                          <button class="session-del-btn" onclick="statsSessionDelete('${t.id}',${i})">&#x2715;</button>
+                        </div>`).join('')}
+                    </div>
+                  </details>
+                </td>
+              </tr>`).join('')}
+          </table>
+        </div>
+      </div>
+    </div>`;
+
+  // draw charts after DOM is ready
+  requestAnimationFrame(() => {
+    drawBarChart(cats, catTime, catColors);
+    drawPieChart(cats, catTime, catColors);
+    drawHeatmap(heatData);
+  });
+}
+
+function setStatsFilter(cat) {
+  statsFilter = cat;
+  renderStats();
+}
+
+function drawBarChart(cats, catTime, catColors) {
+  const canvas = document.getElementById('barChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.offsetWidth; const H = 180;
+  canvas.width = W; canvas.height = H;
+  ctx.clearRect(0,0,W,H);
+
+  const vals = cats.map(c => catTime[c]||0);
+  const max = Math.max(...vals, 1);
+  const pad = {l:8,r:8,t:8,b:28};
+  const bw = (W-pad.l-pad.r)/cats.length;
+
+  vals.forEach((v,i) => {
+    const bh = ((H-pad.t-pad.b) * v/max);
+    const x = pad.l + i*bw + bw*0.15;
+    const y = H-pad.b-bh;
+    ctx.fillStyle = catColors[cats[i]]+'99';
+    ctx.beginPath();
+    ctx.roundRect(x, y, bw*0.7, bh, 3);
+    ctx.fill();
+    ctx.fillStyle = catColors[cats[i]];
+    ctx.font = '9px monospace';
+    ctx.textAlign = 'center';
+    if (v>0) ctx.fillText(fmtDurationH(v), x+bw*0.35, y-4);
+    ctx.fillStyle = '#63748a';
+    ctx.fillText(catLabel[cats[i]].split(' ')[0], x+bw*0.35, H-pad.b+12);
+  });
+}
+
+function drawPieChart(cats, catTime, catColors) {
+  const canvas = document.getElementById('pieChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.offsetWidth; const H = 180;
+  canvas.width = W; canvas.height = H;
+  ctx.clearRect(0,0,W,H);
+
+  const vals = cats.map(c => catTime[c]||0);
+  const total = vals.reduce((a,b)=>a+b,0);
+  if (total === 0) {
+    ctx.fillStyle='#4a5568'; ctx.font='12px monospace'; ctx.textAlign='center';
+    ctx.fillText('No data yet', W/2, H/2); return;
+  }
+  const cx=W/2, cy=H/2, r=Math.min(W,H)/2-10;
+  let angle=-Math.PI/2;
+  vals.forEach((v,i) => {
+    if (!v) return;
+    const slice = (v/total)*Math.PI*2;
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,angle,angle+slice);
+    ctx.closePath();
+    ctx.fillStyle = catColors[cats[i]];
+    ctx.fill();
+    ctx.strokeStyle = '#080b10'; ctx.lineWidth=2; ctx.stroke();
+    // label
+    const mid = angle+slice/2;
+    if (slice > 0.3) {
+      ctx.fillStyle='#fff'; ctx.font='9px monospace'; ctx.textAlign='center';
+      ctx.fillText(Math.round(v/total*100)+'%', cx+Math.cos(mid)*r*0.65, cy+Math.sin(mid)*r*0.65+4);
+    }
+    angle += slice;
+  });
+}
+
+function drawHeatmap(heatData) {
+  const area = document.getElementById('heatmapArea');
+  if (!area) return;
+  const maxVal = Math.max(...Object.values(heatData), 1);
+  // last 30 days
+  const today = new Date(); today.setHours(0,0,0,0);
+  const days = [];
+  for (let i=29; i>=0; i--) {
+    const d = new Date(today); d.setDate(d.getDate()-i);
+    days.push(d.toISOString().slice(0,10));
+  }
+  // pad to start on Sunday
+  const firstDay = new Date(days[0]).getDay();
+  const cells = Array(firstDay).fill(null).concat(days);
+
+  const getColor = (ms) => {
+    if (!ms) return '#1c2330';
+    const intensity = Math.min(ms/maxVal, 1);
+    if (intensity < 0.25) return '#0d4429';
+    if (intensity < 0.5)  return '#006d32';
+    if (intensity < 0.75) return '#26a641';
+    return '#39d353';
+  };
+
+  const dow = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  area.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:3px">
+      ${dow.map(d=>`<div style="font-family:var(--mono);font-size:0.5rem;color:var(--muted);text-align:center">${d}</div>`).join('')}
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px">
+      ${cells.map(date => {
+        if (!date) return '<div style="aspect-ratio:1"></div>';
+        const ms = heatData[date]||0;
+        const tip = ms ? `${date}: ${fmtDurationH(ms)}` : date;
+        return `<div style="aspect-ratio:1;border-radius:2px;background:${getColor(ms)};cursor:default" title="${tip}"></div>`;
+      }).join('')}
+    </div>
+    <div class="heatmap-legend" style="margin-top:6px">
+      Less
+      <div class="heatmap-legend-cells">
+        ${['#1c2330','#0d4429','#006d32','#26a641','#39d353'].map(c=>`<div class="heatmap-legend-cell" style="background:${c};width:8px;height:8px;border-radius:2px"></div>`).join('')}
+      </div>
+      More
+    </div>`;
+}
+
+
+function parseDuration(str) {
+  // parse strings like "1h 30m", "45m", "2h", "90m", "1:30:00", "0:45"
+  str = str.trim().toLowerCase();
+  let ms = 0;
+  const hm = str.match(/(\d+)\s*h(?:\s*(\d+)\s*m?)?/);
+  const mo = str.match(/^(\d+)\s*m$/);
+  const colon = str.match(/^(\d+):(\d+)(?::(\d+))?$/);
+  if (hm) {
+    ms = (parseInt(hm[1])||0)*3600000 + (parseInt(hm[2]||0))*60000;
+  } else if (mo) {
+    ms = parseInt(mo[1])*60000;
+  } else if (colon) {
+    if (colon[3] !== undefined) {
+      ms = (parseInt(colon[1])*3600 + parseInt(colon[2])*60 + parseInt(colon[3]))*1000;
+    } else {
+      ms = (parseInt(colon[1])*60 + parseInt(colon[2]))*60000;
+    }
+  } else {
+    const num = parseFloat(str);
+    if (!isNaN(num)) ms = num*3600000; // treat bare number as hours
+  }
+  return ms > 0 ? ms : null;
+}
+
+function sessionEditDuration(taskId, idx, val) {
+  const t = getTask(taskId);
+  if (!t || !t.timerSessions[idx]) return;
+  const ms = parseDuration(val);
+  if (ms === null) { renderTimerTab(); return; } // revert on invalid
+  t.timerSessions[idx].duration = ms;
+  renderTimerTab();
+}
+
+function sessionDelete(taskId, idx) {
+  const t = getTask(taskId);
+  if (!t) return;
+  t.timerSessions.splice(idx, 1);
+  renderTimerTab();
+  renderKanban();
+}
+
+function statsSessionEdit(taskId, idx, val) {
+  const t = getTask(taskId);
+  if (!t || !t.timerSessions[idx]) return;
+  const ms = parseDuration(val);
+  if (ms === null) { renderStats(); return; }
+  t.timerSessions[idx].duration = ms;
+  renderStats();
+}
+
+function statsSessionDelete(taskId, idx) {
+  const t = getTask(taskId);
+  if (!t) return;
+  t.timerSessions.splice(idx, 1);
+  renderStats();
+  renderKanban();
+}
+
 // ══════════════════════════════════════════════════════
 // DRAG AND DROP
 // ══════════════════════════════════════════════════════
@@ -1153,7 +1656,10 @@ function drop(e, status) {
   if (!dragTaskId) return;
   const t = getTask(dragTaskId);
   if (!t || t.status === status) return;
+  const prev = t.status;
   t.status = status;
+  if(status==='done'&&prev!=='done') t.completedAt=new Date().toISOString().slice(0,10);
+  if(status!=='done'&&prev==='done') t.completedAt=null;
   // if detail panel is open for this task, update status field too
   if (activeTaskId === dragTaskId) {
     document.getElementById('dp-status').value = status;
