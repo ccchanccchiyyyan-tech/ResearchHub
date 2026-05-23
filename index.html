@@ -223,6 +223,15 @@ table.diff-tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-
 .m-date-btn:hover{border-color:var(--accent);}
 .m-date-btn.empty{color:var(--muted);}
 
+
+/* DRAG AND DROP */
+.task-card[draggable=true]{cursor:grab;}
+.task-card[draggable=true]:active{cursor:grabbing;}
+.task-card.dragging{opacity:0.4;transform:scale(0.97);}
+.kol-body.drag-over{background:rgba(88,166,255,0.06);border-radius:6px;outline:2px dashed var(--accent);outline-offset:-4px;}
+.kol-drop-indicator{height:3px;background:var(--accent);border-radius:2px;margin:2px 0;opacity:0;transition:opacity 0.12s;}
+.kol-drop-indicator.active{opacity:1;}
+
 </style>
 </head>
 <body>
@@ -235,6 +244,7 @@ table.diff-tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-
   <div class="header-right">
     <span class="stat-pill" id="statPill">— tasks</span>
     <span class="stat-pill" id="syncStatus" style="border-color:var(--border2);color:var(--muted)">⬤ local</span>
+    <button class="hbtn" onclick="loadFromGist()" id="pullBtn">&#x2193; Pull</button>
     <button class="hbtn" onclick="syncToGist()" id="saveBtn">&#x2191; Save</button>
     <button class="hbtn" onclick="openSettings()">&#x2699; Settings</button>
     <button class="hbtn primary" onclick="openNewTaskModal('todo')">+ New Task</button>
@@ -245,17 +255,17 @@ table.diff-tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-
   <div class="kanban-area" id="kanbanArea">
     <div class="kol">
       <div class="kol-head todo"><div class="kol-title"><span class="kol-dot"></span>To Do</div><span class="kol-count" id="cnt-todo">0</span></div>
-      <div class="kol-body" id="col-todo"></div>
+      <div class="kol-body" id="col-todo" ondragover="dragOver(event,'todo')" ondragleave="dragLeave(event)" ondrop="drop(event,'todo')"></div>
       <button class="kol-add" onclick="openNewTaskModal('todo')">+ Add task</button>
     </div>
     <div class="kol">
       <div class="kol-head doing"><div class="kol-title"><span class="kol-dot"></span>In Progress</div><span class="kol-count" id="cnt-doing">0</span></div>
-      <div class="kol-body" id="col-doing"></div>
+      <div class="kol-body" id="col-doing" ondragover="dragOver(event,'doing')" ondragleave="dragLeave(event)" ondrop="drop(event,'doing')"></div>
       <button class="kol-add" onclick="openNewTaskModal('doing')">+ Add task</button>
     </div>
     <div class="kol">
       <div class="kol-head done"><div class="kol-title"><span class="kol-dot"></span>Done</div><span class="kol-count" id="cnt-done">0</span></div>
-      <div class="kol-body" id="col-done"></div>
+      <div class="kol-body" id="col-done" ondragover="dragOver(event,'done')" ondragleave="dragLeave(event)" ondrop="drop(event,'done')"></div>
       <button class="kol-add" onclick="openNewTaskModal('done')">+ Add task</button>
     </div>
   </div>
@@ -433,7 +443,7 @@ function cardHTML(t){
   const hasTree=t.tree&&t.tree.length>0;
   const isAct=t.id===activeTaskId;
   const footer=hasTree?`<div class="card-footer"><span class="badge-tree">&#x2442; tree</span></div>`:'';
-  return `<div class="task-card ${t.category}${isAct?' active':''}" onclick="openTask('${t.id}')">
+  return `<div class="task-card ${t.category}${isAct?' active':''}" draggable="true" ondragstart="dragStart(event,'${t.id}')" ondragend="dragEnd(event)" onclick="openTask('${t.id}')">
     <div class="card-inner">
       <div class="card-top"><div class="card-title">${t.title}</div><span class="pri-badge p-${t.priority}">${t.priority.toUpperCase()}</span></div>
       <div class="card-meta">
@@ -783,6 +793,58 @@ function setDateValue(target, iso) {
   updateDateBtn(target, iso || '');
 }
 
+
+// ══════════════════════════════════════════════════════
+// DRAG AND DROP
+// ══════════════════════════════════════════════════════
+let dragTaskId = null;
+
+function dragStart(e, id) {
+  dragTaskId = id;
+  e.dataTransfer.effectAllowed = 'move';
+  // slight delay so the card renders dragging state after pickup
+  setTimeout(() => {
+    const el = document.querySelector(`[ondragstart*="${id}"]`);
+    if (el) el.classList.add('dragging');
+  }, 0);
+}
+
+function dragEnd(e) {
+  dragTaskId = null;
+  document.querySelectorAll('.task-card').forEach(el => el.classList.remove('dragging'));
+  document.querySelectorAll('.kol-body').forEach(el => el.classList.remove('drag-over'));
+}
+
+function dragOver(e, status) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  // highlight target column
+  document.querySelectorAll('.kol-body').forEach(el => el.classList.remove('drag-over'));
+  document.getElementById('col-' + status).classList.add('drag-over');
+}
+
+function dragLeave(e) {
+  // only remove if leaving the kol-body itself (not a child)
+  if (!e.currentTarget.contains(e.relatedTarget)) {
+    e.currentTarget.classList.remove('drag-over');
+  }
+}
+
+function drop(e, status) {
+  e.preventDefault();
+  document.querySelectorAll('.kol-body').forEach(el => el.classList.remove('drag-over'));
+  if (!dragTaskId) return;
+  const t = getTask(dragTaskId);
+  if (!t || t.status === status) return;
+  t.status = status;
+  // if detail panel is open for this task, update status field too
+  if (activeTaskId === dragTaskId) {
+    document.getElementById('dp-status').value = status;
+  }
+  renderKanban();
+  dragTaskId = null;
+}
+
 // ══════════════════════════════════════════════════════
 // GIST SYNC
 // ══════════════════════════════════════════════════════
@@ -808,6 +870,7 @@ function setSyncStatus(state, msg) {
   el.style.borderColor = s.color;
   el.textContent = msg || s.text;
   btn.disabled = state === 'saving' || state === 'loading';
+  const pullBtn = document.getElementById('pullBtn'); if(pullBtn) pullBtn.disabled = state === 'saving' || state === 'loading';
 }
 
 function serializeData() {
