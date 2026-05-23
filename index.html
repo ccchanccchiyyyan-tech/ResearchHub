@@ -411,7 +411,22 @@ canvas.stats-canvas{width:100%;display:block;}
 <header id="mainHeader" style="display:none">
   <div class="brand">
     <span class="brand-logo" onclick="goToLanding()" style="cursor:pointer" title="Back to home">RESEARCH HUB</span>
-    <span class="brand-sub">CYAN · RUG / ASTRONOMY</span>
+    <div class="brand-sub" style="display:flex;flex-direction:column;gap:4px;min-width:160px">
+      <div style="display:flex;align-items:center;gap:7px">
+        <span style="white-space:nowrap;width:24px">NL</span>
+        <div style="flex:1;height:2px;background:var(--border2);border-radius:2px;overflow:hidden;min-width:80px">
+          <div id="nlProgressBar" style="height:100%;background:var(--accent);border-radius:2px"></div>
+        </div>
+        <span id="nlProgressPct" style="white-space:nowrap;min-width:28px;text-align:right"></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:7px">
+        <span style="white-space:nowrap;width:24px">PhD</span>
+        <div style="flex:1;height:2px;background:var(--border2);border-radius:2px;overflow:hidden;min-width:80px">
+          <div id="phdProgressBar" style="height:100%;background:var(--cat-analysis);border-radius:2px"></div>
+        </div>
+        <span id="phdProgressPct" style="white-space:nowrap;min-width:28px;text-align:right"></span>
+      </div>
+    </div>
   </div>
   <div class="header-right">
     <span class="stat-pill" id="statPill">— tasks</span>
@@ -1840,7 +1855,17 @@ function saveSettings() {
   if (isClaudePreview) {
     try { await window.storage.delete('rh_data'); } catch(e) {}
   }
-  // Show landing page, kanban is hidden until enterHub() is called
+  // Progress bars
+  const now = new Date();
+  const calcPct = (s,e) => Math.min(100,Math.max(0,Math.round((now-new Date(s))/(new Date(e)-new Date(s))*100)));
+  const nlPct  = calcPct('2025-11-09','2027-10-31');
+  const phdPct = calcPct('2021-09-01','2028-05-20');
+  const set = (barId, lblId, pct) => {
+    const b=document.getElementById(barId), l=document.getElementById(lblId);
+    if(b) b.style.width=pct+'%'; if(l) l.textContent=pct+'%';
+  };
+  set('nlProgressBar','nlProgressPct',nlPct);
+  set('phdProgressBar','phdProgressPct',phdPct);
 })();
 
 </script>
