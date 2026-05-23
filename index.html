@@ -404,6 +404,18 @@ canvas.stats-canvas{width:100%;display:block;}
 .session-del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.75rem;padding:0 2px;margin-left:4px;transition:color 0.12s;}
 .session-del-btn:hover{color:var(--stop);}
 
+
+/* TREE DRAG AND DROP */
+.t-card.drag-over-top    { border-top: 2px solid var(--accent) !important; }
+.t-card.drag-over-bottom { border-bottom: 2px solid var(--accent) !important; }
+.t-card.drag-over-mid    { border: 2px solid var(--s4) !important; background: rgba(86,211,100,0.08) !important; }
+.t-branch.dragging       { opacity: 0.35; }
+
+/* TREE HIGHLIGHT */
+.t-card.highlight-path   { border-color: var(--accent) !important; box-shadow: 0 0 0 1px var(--accent), 0 0 12px rgba(88,166,255,0.25) !important; }
+.t-card.highlight-dim    { opacity: 0.2; }
+.t-card.highlight-active { border-color: var(--accent) !important; background: rgba(88,166,255,0.1) !important; box-shadow: 0 0 0 2px var(--accent) !important; }
+
 </style>
 </head>
 <body>
@@ -673,6 +685,7 @@ function openTask(id){
 
 function closeDetail(){
   activeTaskId=null;
+  highlightedNodeId=null; highlightPath=[];
   document.getElementById('detailPanel').classList.remove('open');
   const bd=document.getElementById('mobileBackdrop');
   if(bd) bd.style.display='none';
@@ -773,7 +786,7 @@ function renderTNode(n,isRoot){
   const hasCh=n.children&&n.children.length>0;
   const colBtn=hasCh?`<button class="t-collapse-btn" onclick="toggleCollapse('${n.id}',event)">${n.collapsed?'&#x25B6;':'&#x25BC;'}</button>`:'<div class="t-spacer"></div>';
   const dcls=diffA===n.id?'sel-a':diffB===n.id?'sel-b':'';
-  return `<div class="t-branch">
+  return `<div class="t-branch" id="t-branch-${n.id}">
     <div class="t-row${isRoot?' t-root':''}">
       ${colBtn}
       <div class="t-card st-${n.stage} ${dcls}" onclick="treeNodeClick('${n.id}')">
@@ -790,7 +803,7 @@ function renderTNode(n,isRoot){
 }
 
 function toggleCollapse(id,e){e.stopPropagation();const t=getTask(activeTaskId);const n=findNode(id,t.tree);if(n){n.collapsed=!n.collapsed;renderTree();}}
-function treeNodeClick(id){if(diffMode){pickDiff(id);return;}treeEditNode(id);}
+// treeNodeClick defined in TREE DnD section
 
 function setDrawerMode(isNew) {
   ['ndAddChildBtn','ndForkBtn','ndDelBtn'].forEach(id => {
@@ -1724,6 +1737,153 @@ function enterHub() {
   } else {
     loadFromGist();
   }
+}
+
+
+// ══════════════════════════════════════════════════════
+// TREE DRAG AND DROP
+// ══════════════════════════════════════════════════════
+let treeDragId = null;
+let highlightedNodeId = null;
+let highlightPath = [];   // ids from root to highlighted node
+
+// ── Path finding ──
+function findPath(targetId, list, path=[]) {
+  for (const n of list) {
+    const newPath = [...path, n.id];
+    if (n.id === targetId) return newPath;
+    const found = findPath(targetId, n.children, newPath);
+    if (found) return found;
+  }
+  return null;
+}
+
+function isOnHighlightPath(id) {
+  return highlightPath.includes(id);
+}
+
+function isDescendant(ancestorId, nodeId, list) {
+  const node = findNode(ancestorId, list);
+  if (!node) return false;
+  return findNode(nodeId, node.children) !== null;
+}
+
+// ── Highlight ──
+function treeNodeClick(id) {
+  if (diffMode) { pickDiff(id); return; }
+  // toggle highlight
+  if (highlightedNodeId === id) {
+    highlightedNodeId = null;
+    highlightPath = [];
+    renderTree();
+    return;
+  }
+  // highlight path
+  const t = getTask(activeTaskId);
+  const path = findPath(id, t.tree);
+  if (path) {
+    highlightedNodeId = id;
+    highlightPath = path;
+    renderTree();
+  }
+  // also open editor
+  treeEditNode(id);
+}
+
+// ── Drag ──
+function treeDragStart(e, id) {
+  treeDragId = id;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', id);
+  setTimeout(() => {
+    const el = document.getElementById('t-branch-' + id);
+    if (el) el.classList.add('dragging');
+  }, 0);
+}
+
+function treeDragEnd(e) {
+  document.querySelectorAll('.t-card').forEach(el => {
+    el.classList.remove('drag-over-top','drag-over-bottom','drag-over-mid');
+  });
+  document.querySelectorAll('.t-branch').forEach(el => el.classList.remove('dragging'));
+  treeDragId = null;
+}
+
+function treeDragOver(e, id) {
+  e.preventDefault();
+  if (!treeDragId || treeDragId === id) return;
+  // don't allow dropping onto own descendants
+  const t = getTask(activeTaskId);
+  if (isDescendant(treeDragId, id, t.tree)) return;
+  e.dataTransfer.dropEffect = 'move';
+  const el = e.currentTarget;
+  el.classList.remove('drag-over-top','drag-over-bottom','drag-over-mid');
+  const rect = el.getBoundingClientRect();
+  const relY = e.clientY - rect.top;
+  const h = rect.height;
+  if (relY < h * 0.25)      el.classList.add('drag-over-top');
+  else if (relY > h * 0.75) el.classList.add('drag-over-bottom');
+  else                        el.classList.add('drag-over-mid');
+}
+
+function treeDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over-top','drag-over-bottom','drag-over-mid');
+}
+
+function treeDrop(e, targetId) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over-top','drag-over-bottom','drag-over-mid');
+  if (!treeDragId || treeDragId === targetId) return;
+  const t = getTask(activeTaskId);
+  if (isDescendant(treeDragId, targetId, t.tree)) return;
+
+  const rect = e.currentTarget.getBoundingClientRect();
+  const relY = e.clientY - rect.top;
+  const h = rect.height;
+  let zone;
+  if (relY < h * 0.25)      zone = 'before';
+  else if (relY > h * 0.75) zone = 'after';
+  else                        zone = 'child';
+
+  // remove dragged node from tree
+  const dragNode = findNode(treeDragId, t.tree);
+  if (!dragNode) return;
+  removeNode(treeDragId, t.tree);
+
+  // insert at new position
+  if (zone === 'child') {
+    const target = findNode(targetId, t.tree);
+    if (target) { target.children.unshift(dragNode); target.collapsed = false; }
+  } else {
+    insertSibling(targetId, dragNode, t.tree, zone === 'before');
+  }
+
+  // reset highlight if needed
+  if (highlightedNodeId) {
+    const path = findPath(highlightedNodeId, t.tree);
+    highlightPath = path || [];
+    if (!path) highlightedNodeId = null;
+  }
+  renderTree();
+}
+
+function removeNode(id, list) {
+  for (let i = 0; i < list.length; i++) {
+    if (list[i].id === id) { list.splice(i, 1); return true; }
+    if (removeNode(id, list[i].children)) return true;
+  }
+  return false;
+}
+
+function insertSibling(targetId, newNode, list, before) {
+  for (let i = 0; i < list.length; i++) {
+    if (list[i].id === targetId) {
+      list.splice(before ? i : i + 1, 0, newNode);
+      return true;
+    }
+    if (insertSibling(targetId, newNode, list[i].children, before)) return true;
+  }
+  return false;
 }
 
 // ══════════════════════════════════════════════════════
